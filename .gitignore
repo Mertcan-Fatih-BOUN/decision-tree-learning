@@ -2,4 +2,7 @@
 out
 *.iml
 
-datasets
+datasets/mirflicker_github
+datasets/mnist
+datasets/msd_genre
+datasets/mirflickr
