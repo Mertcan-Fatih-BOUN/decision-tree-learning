@@ -20,7 +20,7 @@ public class BTRunner {
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
-        boolean user_multi_modal = true;
+        boolean use_multi_modal = true;
         System.out.println("Dataset: " + dataSet.name);
         System.out.println("learning_rate_w: " + learning_rate_w +
                 " learning_rate_gamma: " + learning_rate_gamma +
@@ -30,16 +30,16 @@ public class BTRunner {
                 " learning_rate_decay :" + learning_rate_decay);
         if (use_linear_rho)
             System.out.println("Linear rho");
-        if (user_multi_modal)
+        if (use_multi_modal)
             System.out.println("Multi modal");
         System.out.println("Special note: ");
 
-        if (user_multi_modal && dataSet.first_modal_size == -1) {
+        if (use_multi_modal && dataSet.first_modal_size == -1) {
             System.out.println("Cannot use multi modal algorithm on non-multi-modal data set");
             return;
 
         }
-        BT btm = new BT(dataSet, use_linear_rho, user_multi_modal);
+        BT btm = new BT(dataSet, use_linear_rho, use_multi_modal);
         btm.learnTree(learning_rate_w, learning_rate_gamma, learning_rate_rho, learning_rate_p, epoch, lambda, learning_rate_decay);
     }
 }

@@ -37,8 +37,8 @@ public class BT implements Evaluable {
     /**
      * @param dataSet dataset
      */
-    public BT(DataSet dataSet, boolean user_linear_rho, boolean enable_multi_modal) {
-        this.use_linear_rho = user_linear_rho;
+    public BT(DataSet dataSet, boolean use_linear_rho, boolean enable_multi_modal) {
+        this.use_linear_rho = use_linear_rho;
         this.user_multi_modal = enable_multi_modal;
         this.dataSet = dataSet;
         this.type = dataSet.type;
