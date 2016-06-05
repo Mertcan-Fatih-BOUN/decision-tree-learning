@@ -96,6 +96,7 @@ public class BT implements Evaluable {
             LEARNING_RATE_W *= learning_rate_decay;
             LEARNING_RATE_GAMMA *= learning_rate_decay;
             LEARNING_RATE_RHO *= learning_rate_decay;
+            LEARNING_RATE_P *= learning_rate_decay;
         }
     }
 
