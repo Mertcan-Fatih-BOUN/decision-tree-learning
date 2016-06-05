@@ -6,4 +6,6 @@ You can read [our project report](https://drive.google.com/file/d/0B19XvF5mbR4Nc
 
 You can look [our work-in-progress repository](https://github.com/mrtcnnccn/Decision-Tree). It is a little messy.
 
-Also this is [our poster](https://drive.google.com/file/d/0B19XvF5mbR4NcG91SHBEU3JnQWs/view?usp=sharing).
+You can look [our poster](https://drive.google.com/file/d/0B19XvF5mbR4NcG91SHBEU3JnQWs/view?usp=sharing).
+
+You can watch [our video presentation](https://www.youtube.com/watch?v=J3vAcYoU6BA).
