@@ -272,17 +272,20 @@ class Node {
             for (int j = 0; j < tree.CLASS_COUNT; j++) {
                 if (tree.user_multi_modal) {
                     int firstmodal_size = tree.dataSet.first_modal_size;
+                    //Project report equation 10
                     if (i < firstmodal_size)
                         gradient_w[i] += delta[j] * (1 - gamma) * g1 * (P1[j] / (P1[j] + P2[j])) * (1 - g1) * (left_y[j] - right_y[j]) * instance.x[i];
                     else
                         gradient_w[i] += delta[j] * (1 - gamma) * g2 * (P2[j] / (P1[j] + P2[j])) * (1 - g2) * (left_y[j] - right_y[j]) * instance.x[i];
                 } else {
+                    //Budding Trees paper derivative of J respect to w
                     gradient_w[i] += delta[j] * (1 - gamma) * g[j] * (1 - g[j]) * (left_y[j] - right_y[j]) * instance.x[i];
                 }
             }
         }
 
 
+        //Project report equation 11
         Arrays.fill(gradient_P1, 0);
         for (int i = 0; i < tree.CLASS_COUNT; i++)
             gradient_P1[i] += delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * ((g1 * (P1[i] + P2[i]) - (P1[i] * g1 + P2[i] * g2)) / ((P1[i] + P2[i]) * (P1[i] + P2[i])));
@@ -291,21 +294,23 @@ class Node {
         for (int i = 0; i < tree.CLASS_COUNT; i++)
             gradient_P2[i] += delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * ((g2 * (P1[i] + P2[i]) - (P1[i] * g1 + P2[i] * g2)) / ((P1[i] + P2[i]) * (P1[i] + P2[i])));
 
-
+        //Budding Trees paper derivative of J respect to w
         gradient_w0 = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
             gradient_w0 += delta[i] * (1 - gamma) * g[i] * (1 - g[i]) * (left_y[i] - right_y[i]);
 
+        //Project report equation 11
         gradient_w00 = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
             gradient_w00 += delta[i] * (1 - gamma) * g1 * (P1[i] / (P1[i] + P2[i])) * (1 - g1) * (left_y[i] - right_y[i]);
 
-
+        //Project report equation 11
         gradient_w01 = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
             gradient_w01 += delta[i] * (1 - gamma) * g2 * (P2[i] / (P1[i] + P2[i])) * (1 - g2) * (left_y[i] - right_y[i]);
 
 
+        //Project report equation 13
         if (tree.use_linear_rho) {
             for (int i = 0; i < tree.CLASS_COUNT; i++) {
                 for (int j = 0; j < tree.ATTRIBUTE_COUNT; j++) {
@@ -314,10 +319,12 @@ class Node {
             }
         }
 
+        //Budding tree paper, derivative of J respect to rho
         for (int i = 0; i < tree.CLASS_COUNT; i++) {
             gradient_rho0[i] = delta[i] * gamma;
         }
 
+        //Budding tree paper, derivatinve of J respect to gamma
         gradient_gamma = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
             gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + rho0[i]) - tree.LAMBDA;
@@ -338,7 +345,6 @@ class Node {
     }
 
     private void learnParameters() {
-
         for (int i = 0; i < sum_grad_w.length; i++) {
             sum_grad_w[i] += gradient_w[i] * gradient_w[i];
         }
@@ -374,6 +380,7 @@ class Node {
         sum_grad_gamma += gradient_gamma * gradient_gamma;
 
 
+        //Budding tree paper, adaptive leaning rate, end of the third page
         for (int i = 0; i < sum_grad_w.length; i++) {
             if (sum_grad_w[i] != 0)
                 w[i] = w[i] - tree.LEARNING_RATE * tree.LEARNING_RATE_INPUT_MULTIPLIER * gradient_w[i] / Math.sqrt(sum_grad_w[i]);
