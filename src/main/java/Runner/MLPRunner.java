@@ -2,6 +2,7 @@ package Runner;
 
 
 import DataSet.DataSet.DataSet;
+import DataSet.Reader.FlickerReader;
 import DataSet.Reader.MNISTReader;
 import MultiLayerPerceptron.MLP;
 
@@ -10,12 +11,12 @@ import java.net.URISyntaxException;
 
 public class MLPRunner {
     public static void main(String[] args) throws IOException, URISyntaxException {
-        //DataSet dataSet = FlickerReader.getGithubDatasetNoTag();
+        DataSet dataSet = FlickerReader.getGithubDataset();
         //DataSet dataSet = Readers.MSDReader.getBoth();
-        DataSet dataSet = MNISTReader.getMNIST();
+        //DataSet dataSet = MNISTReader.getMNIST();
         System.out.println("File read");
 
-        int neuron_number = 15;
+        int neuron_number = 100;
         int epoch = 50;
         double learn_rate = 0.01;
         boolean print_each_epoch = true;

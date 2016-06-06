@@ -20,12 +20,13 @@ public class BT implements Evaluable {
     final int ATTRIBUTE_COUNT;
     final int CLASS_COUNT;
 
-    double LEARNING_RATE_W;
-    double LEARNING_RATE_GAMMA;
-    double LEARNING_RATE_RHO;
-    double LEARNING_RATE_P;
+
+    double LEARNING_RATE;
+    double LEARNING_RATE_INPUT_MULTIPLIER;
+
     double LAMBDA;
 
+    double RANDOM_RANGE;
     private final ArrayList<Instance> X;
     private final ArrayList<Instance> V;
     final DataSet dataSet;
@@ -35,9 +36,12 @@ public class BT implements Evaluable {
 
 
     /**
-     * @param dataSet dataset
+     * @param dataSet            Data set will be used for training
+     * @param use_linear_rho     Whether the BT will use linear leaf responses
+     * @param enable_multi_modal Whether the BT will use multi-modal model
+     * @param random_range       [-random_range random_range] is the initial value of variables
      */
-    public BT(DataSet dataSet, boolean use_linear_rho, boolean enable_multi_modal) {
+    public BT(DataSet dataSet, boolean use_linear_rho, boolean enable_multi_modal, double random_range) {
         this.use_linear_rho = use_linear_rho;
         this.user_multi_modal = enable_multi_modal;
         this.dataSet = dataSet;
@@ -46,7 +50,7 @@ public class BT implements Evaluable {
         this.V = dataSet.VALIDATION_INSTANCES;
         this.ATTRIBUTE_COUNT = X.get(0).x.length;
         this.CLASS_COUNT = X.get(0).r.length;
-
+        this.RANDOM_RANGE = random_range;
         ROOT = new Node(this);
     }
 
@@ -58,11 +62,19 @@ public class BT implements Evaluable {
         return ROOT.myEffSize();
     }
 
-    public void learnTree(double learning_rate_w, double learning_rate_gamma, double learning_rate_rho, double learning_rate_p, int epoch, double lambda, double learning_rate_decay) throws IOException {
-        this.LEARNING_RATE_W = learning_rate_w;
-        this.LEARNING_RATE_GAMMA = learning_rate_gamma;
-        this.LEARNING_RATE_RHO = learning_rate_rho;
-        this.LEARNING_RATE_P = learning_rate_p;
+    /**
+     * Starts the learning process of BT
+     *
+     * @param learning_rate                  Learning rate of update process
+     * @param learning_rate_input_multiplier Learning rate multiplier which is used where the gradient contains input vector directly
+     * @param epoch                          Total epoch
+     * @param lambda                         Complexity cost weight, smaller lambda, smaller tree
+     * @param learning_rate_decay            Multiplier of learning rate after each epoch
+     * @throws IOException
+     */
+    public void learnTree(double learning_rate, double learning_rate_input_multiplier, int epoch, double lambda, double learning_rate_decay) throws IOException {
+        this.LEARNING_RATE = learning_rate;
+        this.LEARNING_RATE_INPUT_MULTIPLIER = learning_rate_input_multiplier;
         this.LAMBDA = lambda;
 
 
@@ -93,10 +105,7 @@ public class BT implements Evaluable {
                 ROOT.backPropagate(instance);
                 ROOT.update();
             }
-            LEARNING_RATE_W *= learning_rate_decay;
-            LEARNING_RATE_GAMMA *= learning_rate_decay;
-            LEARNING_RATE_RHO *= learning_rate_decay;
-            LEARNING_RATE_P *= learning_rate_decay;
+            LEARNING_RATE *= learning_rate_decay;
         }
     }
 

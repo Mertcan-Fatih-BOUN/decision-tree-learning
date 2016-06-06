@@ -10,22 +10,19 @@ import java.net.URISyntaxException;
 public class BTRunner {
     @SuppressWarnings("ConstantConditions")
     public static void main(String[] args) throws IOException, URISyntaxException {
-        DataSet dataSet = FlickerReader.getGithubDataset();
+        DataSet dataSet = FlickerReader.getGithubDatasetNoTag();
         System.out.println("File read");
-        double learning_rate_w = 0.5 * 0.003;
-        double learning_rate_gamma = 0.5;
-        double learning_rate_rho = 0.5;
-        double learning_rate_p = 0.5;
+        double learning_rate = 0.5;
+        double learning_rate_input_multiplier = 1;
         int epoch = 100;
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
-        boolean use_multi_modal = true;
+        boolean use_multi_modal = false;
+        double random_range = 0.001;
         System.out.println("Dataset: " + dataSet.name);
-        System.out.println("learning_rate_w: " + learning_rate_w +
-                " learning_rate_gamma: " + learning_rate_gamma +
-                " learning_rate_rho: " + learning_rate_rho +
-                " learning_rate_p: " + learning_rate_p +
+        System.out.println("learning_rate: " + learning_rate +
+                " learning_rate_input_multiplier: " + learning_rate_input_multiplier +
                 " lambda: " + lambda +
                 " learning_rate_decay :" + learning_rate_decay);
         if (use_linear_rho)
@@ -39,7 +36,7 @@ public class BTRunner {
             return;
 
         }
-        BT btm = new BT(dataSet, use_linear_rho, use_multi_modal);
-        btm.learnTree(learning_rate_w, learning_rate_gamma, learning_rate_rho, learning_rate_p, epoch, lambda, learning_rate_decay);
+        BT btm = new BT(dataSet, use_linear_rho, use_multi_modal, random_range);
+        btm.learnTree(learning_rate, learning_rate_input_multiplier, epoch, lambda, learning_rate_decay);
     }
 }
