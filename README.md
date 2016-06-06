@@ -1,6 +1,8 @@
 #Decision Tree Learning Algorithms
 
-We are Mert Can Çüçen and Fatih Doğan. This repository is source code of our senior project on Boğaziçi University, Computer Engineering.
+We are Mert Can Çüçen and Fatih Doğan. This repository is the source code of our senior project on Boğaziçi University, Computer Engineering Department in 2016 with Prof. Ethem Alpaydın as our advisor. This project is chosen as the best thesis project among all the other senior projects. 
+
+Our main concerns are multilayer perceptrons, [soft decision trees](http://www.cmpe.boun.edu.tr/~ethem/files/papers/icpr2012_softtree.pdf) and [budding trees trees](http://www.cmpe.boun.edu.tr/~ethem/files/papers/ozan-budding-icpr2014.pdf) on large-scaled datasets like MNIST, MIRFLICKR,Million Song Dataset.
 
 You can read [our project report](https://drive.google.com/file/d/0B19XvF5mbR4NcWhkUEdYR2xYV0U/view?usp=sharing).
 
