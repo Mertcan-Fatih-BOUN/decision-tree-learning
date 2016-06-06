@@ -119,7 +119,7 @@ public class FlickerReader {
 
         tag_size = valid_tags.size();
 
-
+        normalize(tags);
         return tags;
     }
 
