@@ -35,7 +35,7 @@ public class WekaFormat {
             e.printStackTrace();
         }
 
-        System.out.println("Writing Training File");
+        System.out.println("Writing Test File");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("datasets" + File.separator + "arffs" + File.separator + dataSet.getName() + "_test.arff"))) {
             writeHeaders(writer, TEST);
             writeData(writer, TEST);
