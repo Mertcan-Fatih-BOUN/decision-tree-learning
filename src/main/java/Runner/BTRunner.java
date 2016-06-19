@@ -10,15 +10,15 @@ import java.net.URISyntaxException;
 public class BTRunner {
     @SuppressWarnings("ConstantConditions")
     public static void main(String[] args) throws IOException, URISyntaxException {
-        DataSet dataSet = FlickerReader.getGithubDatasetNoTag();
+        DataSet dataSet = FlickerReader.getGithubDataset();
         System.out.println("File read");
         double learning_rate = 0.5;
-        double learning_rate_input_multiplier = 1;
+        double learning_rate_input_multiplier = 0.005;
         int epoch = 100;
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
-        boolean use_multi_modal = false;
+        boolean use_multi_modal = true;
         double random_range = 0.001;
         System.out.println("Dataset: " + dataSet.name);
         System.out.println("learning_rate: " + learning_rate +

@@ -387,15 +387,15 @@ class Node {
         }
 
         if (sum_grad_w0 != 0)
-            w0 = w0 - tree.LEARNING_RATE * tree.LEARNING_RATE_INPUT_MULTIPLIER * gradient_w0 / Math.sqrt(sum_grad_w0);
+            w0 = w0 - tree.LEARNING_RATE * gradient_w0 / Math.sqrt(sum_grad_w0);
 
         if (tree.user_multi_modal) {
 
             if (sum_grad_w00 != 0)
-                w00 = w00 - tree.LEARNING_RATE * tree.LEARNING_RATE_INPUT_MULTIPLIER * gradient_w00 / Math.sqrt(sum_grad_w00);
+                w00 = w00 - tree.LEARNING_RATE * gradient_w00 / Math.sqrt(sum_grad_w00);
 
             if (sum_grad_w01 != 0)
-                w01 = w01 - tree.LEARNING_RATE * tree.LEARNING_RATE_INPUT_MULTIPLIER * gradient_w01 / Math.sqrt(sum_grad_w01);
+                w01 = w01 - tree.LEARNING_RATE * gradient_w01 / Math.sqrt(sum_grad_w01);
 
             for (int i = 0; i < sum_grad_P1.length; i++) {
                 if (sum_grad_P1[i] != 0)

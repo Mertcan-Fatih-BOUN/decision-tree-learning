@@ -265,26 +265,28 @@ public class MSDReader {
     }
 
     private static void normalize(ArrayList<Instance> instances) {
-        for (int i = 0; i < instances.get(0).x.length; i++) {
-            double mean = 0;
+        if(Constants.normalizeEnabled) {
+            for (int i = 0; i < instances.get(0).x.length; i++) {
+                double mean = 0;
 
-            for (Instance instance : instances)
-                mean += instance.x[i];
+                for (Instance instance : instances)
+                    mean += instance.x[i];
 
-            mean /= instances.size();
+                mean /= instances.size();
 
-            double stdev = 0;
-            for (Instance instance : instances) {
-                stdev += (instance.x[i] - mean) * (instance.x[i] - mean);
-            }
+                double stdev = 0;
+                for (Instance instance : instances) {
+                    stdev += (instance.x[i] - mean) * (instance.x[i] - mean);
+                }
 
-            stdev = stdev / (instances.size() - 1);
-            stdev = Math.sqrt(stdev);
+                stdev = stdev / (instances.size() - 1);
+                stdev = Math.sqrt(stdev);
 
-            for (Instance instance : instances) {
-                instance.x[i] -= mean;
-                if (stdev != 0)
-                    instance.x[i] /= stdev;
+                for (Instance instance : instances) {
+                    instance.x[i] -= mean;
+                    if (stdev != 0)
+                        instance.x[i] /= stdev;
+                }
             }
         }
     }

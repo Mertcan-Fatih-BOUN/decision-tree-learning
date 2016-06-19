@@ -79,29 +79,31 @@ public class MNISTReader {
     }
 
     private static void normalize(ArrayList<Instance> x, ArrayList<Instance> v) {
-        for (int i = 0; i < ATTRIBUTE_COUNT; i++) {
-            double mean = 0;
-            for (Instance ins : x) {
-                mean += ins.x[i];
-            }
-            mean /= x.size();
+        if(Constants.normalizeEnabled) {
+            for (int i = 0; i < ATTRIBUTE_COUNT; i++) {
+                double mean = 0;
+                for (Instance ins : x) {
+                    mean += ins.x[i];
+                }
+                mean /= x.size();
 
-            double stdev = 0;
-            for (Instance ins : x) {
-                stdev += (ins.x[i] - mean) * (ins.x[i] - mean);
-            }
-            stdev /= (x.size() - 1);
-            stdev = Math.sqrt(stdev);
+                double stdev = 0;
+                for (Instance ins : x) {
+                    stdev += (ins.x[i] - mean) * (ins.x[i] - mean);
+                }
+                stdev /= (x.size() - 1);
+                stdev = Math.sqrt(stdev);
 
-            for (Instance ins : x) {
-                ins.x[i] -= mean;
-                if (stdev != 0)
-                    ins.x[i] /= stdev;
-            }
-            for (Instance ins : v) {
-                ins.x[i] -= mean;
-                if (stdev != 0)
-                    ins.x[i] /= stdev;
+                for (Instance ins : x) {
+                    ins.x[i] -= mean;
+                    if (stdev != 0)
+                        ins.x[i] /= stdev;
+                }
+                for (Instance ins : v) {
+                    ins.x[i] -= mean;
+                    if (stdev != 0)
+                        ins.x[i] /= stdev;
+                }
             }
         }
     }

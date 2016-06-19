@@ -333,33 +333,33 @@ public class FlickerReader {
 
 
     private static void normalize(ArrayList<double[]> values) {
-        for (int i = 0; i < values.get(0).length; i++) {
-            double mean = 0;
+        if(Constants.normalizeEnabled) {
+            for (int i = 0; i < values.get(0).length; i++) {
+                double mean = 0;
 
-            for (double[] value : values) {
-                mean += value[i];
+                for (double[] value : values) {
+                    mean += value[i];
+                }
+                mean /= values.size();
+
+                double stdev = 0;
+                for (double[] value : values) {
+                    stdev += (value[i] - mean) * (value[i] - mean);
+                }
+
+
+                stdev = stdev / (values.size() - 1);
+                stdev = Math.sqrt(stdev);
+
+
+                for (double[] value : values) {
+                    value[i] -= mean;
+                    if (stdev != 0)
+                        value[i] /= stdev;
+
+                }
+
             }
-            mean /= values.size();
-
-            double stdev = 0;
-            for (double[] value : values) {
-                stdev += (value[i] - mean) * (value[i] - mean);
-            }
-
-
-            stdev = stdev / (values.size() - 1);
-            stdev = Math.sqrt(stdev);
-
-
-            for (double[] value : values) {
-                value[i] -= mean;
-                if (stdev != 0)
-                    value[i] /= stdev;
-
-            }
-
         }
     }
-
-
 }
