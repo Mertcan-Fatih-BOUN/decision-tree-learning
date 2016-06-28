@@ -31,7 +31,7 @@ public class BT implements Evaluable {
     private final ArrayList<Instance> V;
     final DataSet dataSet;
 
-    private Node ROOT;
+    protected Node ROOT;
     private final DataSet.TYPE type;
 
 
@@ -54,11 +54,11 @@ public class BT implements Evaluable {
         ROOT = new Node(this);
     }
 
-    private int size() {
+    protected int size() {
         return ROOT.size();
     }
 
-    private double eff_size() {
+    protected double eff_size() {
         return ROOT.myEffSize();
     }
 
@@ -85,19 +85,19 @@ public class BT implements Evaluable {
                 System.out.printf("Epoch: %3d, Size: %3d, Effective Size: %3d\n", e, size(), (int) eff_size());
                 System.out.printf("%4s %4s %4s %4s\n", "xMAP", "xPRE", "vMAP", "vPRE");
                 for (int i = 0; i < CLASS_COUNT; i++) {
-                    System.out.printf("%.2f %.2f %.2f %.2f\n", mapErrorX.MAP[i], mapErrorX.precision[i], mapErrorV.MAP[i], mapErrorV.precision[i]);
+                    System.out.printf("%.3f %.3f %.3f %.3f\n", mapErrorX.MAP[i], mapErrorX.precision[i], mapErrorV.MAP[i], mapErrorV.precision[i]);
                 }
                 System.out.printf("%4s %4s %4s %4s\n", "----", "----", "----", "----");
-                System.out.printf("%.2f %.2f %.2f %.2f\n", mapErrorX.getAverageMAP(), mapErrorX.getAveragePrec(), mapErrorV.getAverageMAP(), mapErrorV.getAveragePrec());
+                System.out.printf("%.3f %.3f %.3f %.3f\n", mapErrorX.getAverageMAP(), mapErrorX.getAveragePrec(), mapErrorV.getAverageMAP(), mapErrorV.getAveragePrec());
                 System.out.println();
             } else if (this.type == DataSet.TYPE.MULTI_CLASS_CLASSIFICATION || this.type == DataSet.TYPE.BINARY_CLASSIFICATION) {
                 ClassificationError Xerror = getClassificationError(this, X, type);
                 ClassificationError Verror = getClassificationError(this, V, type);
-                System.out.printf("Epoch : %d Size: %d X: %.2f V: %.2f\n", e, size(), Xerror.getAccuracy(), Verror.getAccuracy());
+                System.out.printf("Epoch : %d Size: %d Effective Size: %3d X: %.3f V: %.3f\n", e, size(), (int) (eff_size()), Xerror.getAccuracy(), Verror.getAccuracy());
                 System.out.println("X Confusion Matrix\n" + Xerror.getStringConfusionMatrix());
                 System.out.println("V Confusion Matrix\n" + Verror.getStringConfusionMatrix());
             } else if (this.type == DataSet.TYPE.REGRESSION)
-                System.out.printf("Epoch: %d Size: %d MSE X: %.2f MSE V: %.2f\n", e, size(), getMeanSquareError(this, X), getMeanSquareError(this, V));
+                System.out.printf("Epoch: %d Size: %d MSE X: %.3f MSE V: %.3f\n", e, size(), getMeanSquareError(this, X), getMeanSquareError(this, V));
 
             Collections.shuffle(X);
             for (Instance instance : X) {

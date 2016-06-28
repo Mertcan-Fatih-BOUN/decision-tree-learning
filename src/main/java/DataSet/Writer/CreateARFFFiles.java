@@ -1,7 +1,6 @@
 package DataSet.Writer;
 
 import DataSet.DataSet.DataSet;
-import DataSet.Reader.FlickerReader;
 import DataSet.Reader.MNISTReader;
 import DataSet.Reader.MSDReader;
 import DataSet.Reader.PENDATAReader;
@@ -15,7 +14,7 @@ import java.net.URISyntaxException;
 public class CreateARFFFiles {
 
     public static void main(String[] args) throws IOException, URISyntaxException  {
-        WekaFormat wekaFormat = new WekaFormat(getPENDATA(1));
+        WekaFormat wekaFormat = new WekaFormat(getPENDATA(2));
         wekaFormat.outputARFFFile();
     }
 
@@ -26,11 +25,13 @@ public class CreateARFFFiles {
     public static DataSet getPENDATA(int mode) throws IOException, URISyntaxException {
         switch (mode){
             case 0:
-                return PENDATAReader.readStatic();
+                return PENDATAReader.getStatic();
             case 1:
-                return PENDATAReader.readDynamic();
+                return PENDATAReader.getDynamic();
+            case 2:
+                return PENDATAReader.getBoth();
             default:
-                return PENDATAReader.readStatic();
+                return PENDATAReader.getStatic();
         }
     }
 
