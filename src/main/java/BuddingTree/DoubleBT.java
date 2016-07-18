@@ -6,6 +6,7 @@ import Analysis.MAPError;
 import Analysis.MultiEvaluable;
 import DataSet.DataSet.DataSet;
 import DataSet.Instance.Instance;
+import Misc.Util;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -141,8 +142,8 @@ public class DoubleBT implements MultiEvaluable {
 
 
 
-            Collections.shuffle(dataSet1.TRAINING_INSTANCES);
-            Collections.shuffle(dataSet2.TRAINING_INSTANCES);
+            Collections.shuffle(dataSet1.TRAINING_INSTANCES, Util.generator);
+            Collections.shuffle(dataSet2.TRAINING_INSTANCES, Util.generator);
             for (int i = 0; i < dataSet1.TRAINING_INSTANCES.size(); i++) {
                 Instance instance1 = dataSet1.TRAINING_INSTANCES.get(i);
                 Instance instance2 = dataSet2.TRAINING_INSTANCES.get(i);

@@ -16,9 +16,10 @@ import java.net.URISyntaxException;
 public class BTRunner {
     @SuppressWarnings("ConstantConditions")
     public static void main(String[] args) throws IOException, URISyntaxException {
+        DataSet dataSet = MNISTReader.getBoth();
 //        DataSet dataSet = MNISTReader.getMNIST();
 //        DataSet dataSet = FlickerReader.getGithubDataset();
-        DataSet dataSet = PENDATAReader.getStatic();
+//        DataSet dataSet = PENDATAReader.getStatic();
 //        DataSet dataSet = PENDATAReader.getDynamic();
 //        DataSet dataSet = PENDATAReader.getBoth();
 //        DataSet dataSet = MSDReader.getBoth();
@@ -31,8 +32,8 @@ public class BTRunner {
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
-        boolean use_multi_modal = false;
-        boolean use_rms_prop = true;
+        boolean use_multi_modal = true;
+        boolean use_rms_prop = false;
         double[] rms_prop_factors = new double[]{0.9, 0.1};
         double random_range = 0.001;
 

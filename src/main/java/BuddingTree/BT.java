@@ -6,6 +6,7 @@ import Analysis.Evaluable;
 import Analysis.MAPError;
 import DataSet.DataSet.DataSet;
 import DataSet.Instance.Instance;
+import Misc.Util;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -149,7 +150,7 @@ public class BT implements Evaluable {
                 }
             }
 
-            Collections.shuffle(X);
+            Collections.shuffle(X, Util.generator);
             for (Instance instance : X) {
                 ROOT.F(instance);
                 ROOT.backPropagate(instance);

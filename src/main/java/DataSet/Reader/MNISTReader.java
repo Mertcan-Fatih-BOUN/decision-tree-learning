@@ -37,6 +37,71 @@ public class MNISTReader {
         return new DataSet("MNIST", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
     }
 
+    public static DataSet getMNIST_TOP() throws URISyntaxException, IOException {
+        ArrayList<Instance> tra = new ArrayList<>();
+        ArrayList<Instance> val = new ArrayList<>();
+
+
+        File file_test = new File("datasets" + File.separator +
+                "mnist" + File.separator +
+                "test.txt");
+
+        File file_train = new File("datasets" + File.separator +
+                "mnist" + File.separator +
+                "train.txt");
+
+        readFileTOP(tra, file_train);
+        readFileTOP(val, file_test);
+
+        normalize(tra, val);
+
+        return new DataSet("MNIST", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
+    }
+
+    public static DataSet getMNIST_BOTTOM() throws URISyntaxException, IOException {
+        ArrayList<Instance> tra = new ArrayList<>();
+        ArrayList<Instance> val = new ArrayList<>();
+
+
+        File file_test = new File("datasets" + File.separator +
+                "mnist" + File.separator +
+                "test.txt");
+
+        File file_train = new File("datasets" + File.separator +
+                "mnist" + File.separator +
+                "train.txt");
+
+        readFileBOTTOM(tra, file_train);
+        readFileBOTTOM(val, file_test);
+
+        normalize(tra, val);
+
+        return new DataSet("MNIST", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
+    }
+
+    public static DataSet getBoth() throws URISyntaxException, IOException {
+        ArrayList<Instance> tra = new ArrayList<>();
+        ArrayList<Instance> val = new ArrayList<>();
+
+
+        File file_test = new File("datasets" + File.separator +
+                "mnist" + File.separator +
+                "test.txt");
+
+        File file_train = new File("datasets" + File.separator +
+                "mnist" + File.separator +
+                "train.txt");
+
+        readFile(tra, file_train);
+        readFile(val, file_test);
+
+        normalize(tra, val);
+
+        return new DataSet("MNIST", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION, 14 * 28);
+    }
+
+
+
     private static void readFile(ArrayList<Instance> I, File file) throws IOException {
         String line;
 
@@ -76,6 +141,90 @@ public class MNISTReader {
 
             I.add(instance);
         }
+    }
+
+    private static void readFileTOP(ArrayList<Instance> I, File file) throws IOException {
+        String line;
+
+        InputStream fis = new FileInputStream(file);
+        InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+        BufferedReader br = new BufferedReader(isr);
+
+        line = br.readLine();
+
+        br.close();
+        String[] s;
+        String splitter;
+        if (!line.contains(","))
+            splitter = "\\s+";
+        else
+            splitter = ",";
+        s = line.split(splitter);
+
+        ATTRIBUTE_COUNT = s.length - 1;
+        Scanner scanner = new Scanner(file);
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+            s = line.split(splitter);
+
+            double[] attributes = new double[ATTRIBUTE_COUNT / 2];
+            for (int i = 0; i < ATTRIBUTE_COUNT / 2; i++) {
+                attributes[i] = Double.parseDouble(s[i]);
+            }
+            String className = s[ATTRIBUTE_COUNT];
+
+            int[] r = new int[10];
+            Arrays.fill(r, 0);
+            r[Integer.parseInt(className)] = 1;
+            Instance instance = new Instance();
+            instance.r = r;
+            instance.x = attributes;
+
+            I.add(instance);
+        }
+        ATTRIBUTE_COUNT /= 2;
+    }
+
+    private static void readFileBOTTOM(ArrayList<Instance> I, File file) throws IOException {
+        String line;
+
+        InputStream fis = new FileInputStream(file);
+        InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+        BufferedReader br = new BufferedReader(isr);
+
+        line = br.readLine();
+
+        br.close();
+        String[] s;
+        String splitter;
+        if (!line.contains(","))
+            splitter = "\\s+";
+        else
+            splitter = ",";
+        s = line.split(splitter);
+
+        ATTRIBUTE_COUNT = s.length - 1;
+        Scanner scanner = new Scanner(file);
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+            s = line.split(splitter);
+
+            double[] attributes = new double[ATTRIBUTE_COUNT / 2];
+            for (int i = ATTRIBUTE_COUNT / 2; i < ATTRIBUTE_COUNT; i++) {
+                attributes[i] = Double.parseDouble(s[i]);
+            }
+            String className = s[ATTRIBUTE_COUNT];
+
+            int[] r = new int[10];
+            Arrays.fill(r, 0);
+            r[Integer.parseInt(className)] = 1;
+            Instance instance = new Instance();
+            instance.r = r;
+            instance.x = attributes;
+
+            I.add(instance);
+        }
+        ATTRIBUTE_COUNT /= 2;
     }
 
     private static void normalize(ArrayList<Instance> x, ArrayList<Instance> v) {

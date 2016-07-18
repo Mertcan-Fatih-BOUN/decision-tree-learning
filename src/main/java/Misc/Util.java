@@ -12,13 +12,14 @@ import java.util.Random;
 
 
 public class Util {
+    public static Random generator = new Random(45645);
     public static double rand(double s, double e) {
         if (e < s) {
             double t = e;
             e = s;
             s = t;
         }
-        return (e - s) * Math.random() + s;
+        return (e - s) * generator.nextDouble() + s;
     }
 
     public static double rand(double s, double e, Random r) {
