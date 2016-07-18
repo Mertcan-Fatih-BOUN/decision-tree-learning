@@ -140,38 +140,42 @@ public class MSDReader {
                 "msd.txt");
         Scanner scanner = new Scanner(file);
 
+        String line = scanner.nextLine();
+        Scanner sc2 = new Scanner(line);
 
-        int class_count = scanner.nextInt();
-        int sound_count = scanner.nextInt();
-        int lyric_count = scanner.nextInt();
+        int class_count = sc2.nextInt();
+        int sound_count = sc2.nextInt();
+        int lyric_count = sc2.nextInt();
 
         while (scanner.hasNext()) {
             Instance instance = new Instance();
             instance.r = new int[class_count];
             Arrays.fill(instance.r, 0);
-            instance.r[scanner.nextInt()] = 1;
+            line = scanner.nextLine();
+            String[] splits = line.split("\\s+");
+            instance.r[Integer.parseInt(splits[0])] = 1;
             instance.x = new double[sound_count];
             for (int i = 0; i < sound_count; i++) {
-                instance.x[i] = scanner.nextDouble();
-            }
-            for (int i = 0; i < lyric_count; i++) {
-                scanner.nextDouble();
+                instance.x[i] = Double.parseDouble(splits[i + 1]);
             }
             instances.add(instance);
             System.out.printf("\r%.2f", (instances.size() * 1.0) / 17495);
-
         }
+
+        System.out.println();
 
         normalize(instances);
 
         ArrayList<Instance> tra = new ArrayList<>();
         ArrayList<Instance> val = new ArrayList<>();
 
+        int i = 0;
         for (Instance instance : instances) {
-            if (random.nextDouble() < training_ratio)
+            if ((i % 10) / 10.0 < training_ratio)
                 tra.add(instance);
             else
                 val.add(instance);
+            i++;
         }
 
 
@@ -187,36 +191,41 @@ public class MSDReader {
                 "msd.txt");
         Scanner scanner = new Scanner(file);
 
-        int class_count = scanner.nextInt();
-        int sound_count = scanner.nextInt();
-        int lyric_count = scanner.nextInt();
+        String line = scanner.nextLine();
+        Scanner sc2 = new Scanner(line);
+
+        int class_count = sc2.nextInt();
+        int sound_count = sc2.nextInt();
+        int lyric_count = sc2.nextInt();
 
         while (scanner.hasNext()) {
             Instance instance = new Instance();
             instance.r = new int[class_count];
             Arrays.fill(instance.r, 0);
-            instance.r[scanner.nextInt()] = 1;
+            line = scanner.nextLine();
+            String[] splits = line.split("\\s+");
+            instance.r[Integer.parseInt(splits[0])] = 1;
             instance.x = new double[lyric_count];
-            for (int i = 0; i < sound_count; i++) {
-                scanner.nextDouble();
-            }
             for (int i = 0; i < lyric_count; i++) {
-                instance.x[i] = scanner.nextDouble();
+                instance.x[i] = Double.parseDouble(splits[sound_count + 1]);
             }
             instances.add(instance);
             System.out.printf("\r%.2f", (instances.size() * 1.0) / 17495);
         }
+        System.out.println();
 
         normalize(instances);
 
         ArrayList<Instance> tra = new ArrayList<>();
         ArrayList<Instance> val = new ArrayList<>();
 
+        int i = 0;
         for (Instance instance : instances) {
-            if (random.nextDouble() < training_ratio)
+            if ((i % 10) / 10.0 < training_ratio)
                 tra.add(instance);
             else
                 val.add(instance);
+            i++;
         }
 
         return new DataSet("MSD Lyrics only", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
@@ -231,18 +240,23 @@ public class MSDReader {
                 "msd.txt");
         Scanner scanner = new Scanner(file);
 
-        int class_count = scanner.nextInt();
-        int sound_count = scanner.nextInt();
-        int lyric_count = scanner.nextInt();
+        String line = scanner.nextLine();
+        Scanner sc2 = new Scanner(line);
+
+        int class_count = sc2.nextInt();
+        int sound_count = sc2.nextInt();
+        int lyric_count = sc2.nextInt();
 
         while (scanner.hasNext()) {
             Instance instance = new Instance();
             instance.r = new int[class_count];
             Arrays.fill(instance.r, 0);
-            instance.r[scanner.nextInt()] = 1;
+            line = scanner.nextLine();
+            String[] splits = line.split("\\s+");
+            instance.r[Integer.parseInt(splits[0])] = 1;
             instance.x = new double[sound_count + lyric_count];
             for (int i = 0; i < sound_count + lyric_count; i++) {
-                instance.x[i] = scanner.nextDouble();
+                instance.x[i] = Double.parseDouble(splits[1 + i]);
             }
 
             instances.add(instance);

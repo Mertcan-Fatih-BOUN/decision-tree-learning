@@ -341,43 +341,44 @@ class Node {
         if (leftNode == null || gamma == 1)
             return 1;
         else
-            return 1 + (1 - gamma) * (leftNode.myEffSize() + rightNode.myEffSize());
+            return gamma + (1 - gamma) * (leftNode.myEffSize() + rightNode.myEffSize());
     }
+
 
     private void learnParameters() {
         for (int i = 0; i < sum_grad_w.length; i++) {
-            sum_grad_w[i] += gradient_w[i] * gradient_w[i];
+            sum_grad_w[i] = tree.rms_prop_factors[0] * sum_grad_w[i] + tree.rms_prop_factors[1] * gradient_w[i] * gradient_w[i];
         }
 
         if (tree.user_multi_modal) {
             for (int i = 0; i < sum_grad_P1.length; i++) {
-                sum_grad_P1[i] += gradient_P1[i] * gradient_P1[i];
+                sum_grad_P1[i] = tree.rms_prop_factors[0] * sum_grad_P1[i] + tree.rms_prop_factors[1] * gradient_P1[i] * gradient_P1[i];
             }
 
             for (int i = 0; i < sum_grad_P2.length; i++) {
-                sum_grad_P2[i] += gradient_P2[i] * gradient_P2[i];
+                sum_grad_P2[i] = tree.rms_prop_factors[0] * sum_grad_P2[i] + tree.rms_prop_factors[1] * gradient_P2[i] * gradient_P2[i];
             }
 
-            sum_grad_w00 += gradient_w00 * gradient_w00;
+            sum_grad_w00 = tree.rms_prop_factors[0] *  sum_grad_w00 + tree.rms_prop_factors[1] * gradient_w00 * gradient_w00;
 
-            sum_grad_w01 += gradient_w01 * gradient_w01;
+            sum_grad_w01 = tree.rms_prop_factors[0] * sum_grad_w01 + tree.rms_prop_factors[1] * gradient_w01 * gradient_w01;
         }
 
-        sum_grad_w0 += gradient_w0 * gradient_w0;
+        sum_grad_w0 = tree.rms_prop_factors[0] * sum_grad_w0 + tree.rms_prop_factors[1] * gradient_w0 * gradient_w0;
 
         if (tree.use_linear_rho) {
             for (int i = 0; i < tree.CLASS_COUNT; i++) {
                 for (int j = 0; j < tree.ATTRIBUTE_COUNT; j++) {
-                    sum_grad_rho[i][j] += gradient_rho[i][j] * gradient_rho[i][j];
+                    sum_grad_rho[i][j] = tree.rms_prop_factors[0] * sum_grad_rho[i][j] + tree.rms_prop_factors[1] * gradient_rho[i][j] * gradient_rho[i][j];
                 }
             }
         }
 
         for (int i = 0; i < sum_grad_rho0.length; i++) {
-            sum_grad_rho0[i] += gradient_rho0[i] * gradient_rho0[i];
+            sum_grad_rho0[i] = tree.rms_prop_factors[0] * sum_grad_rho0[i] + tree.rms_prop_factors[1] * gradient_rho0[i] * gradient_rho0[i];
         }
 
-        sum_grad_gamma += gradient_gamma * gradient_gamma;
+        sum_grad_gamma = tree.rms_prop_factors[0] * sum_grad_gamma + tree.rms_prop_factors[1] * gradient_gamma * gradient_gamma;
 
 
         //Budding tree paper, adaptive leaning rate, end of the third page
