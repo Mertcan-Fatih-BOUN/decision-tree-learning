@@ -20,21 +20,64 @@ public class DoubleBTRunner {
     @SuppressWarnings("ConstantConditions")
     public static void main(String[] args) throws IOException, URISyntaxException {
         System.out.println("Double BT");
-        DataSet dataSet1 = PENDATAReader.getStatic();
-        DataSet dataSet2 = PENDATAReader.getDynamic();
-//        DataSet dataSet1 = MSDReader.getSoundOnly();
-//        DataSet dataSet2 = MSDReader.getLyricsOnly();
-        System.out.println("File read");
 
+        DataSet dataSet1 = null;
+        DataSet dataSet2 = null;
+
+        int dataset_id = 1;
         double learning_rate = 0.1;
         double learning_rate_input_multiplier = 1;
-        int epoch = 100;
+        int epoch = 15;
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
         boolean use_rms_prop = true;
         double[] rms_prop_factors = new double[]{0.9, 0.1};
         double random_range = 0.001;
+
+        if (args.length == 11) {
+            dataset_id = Integer.parseInt(args[0]);
+            learning_rate = Double.parseDouble(args[1]);
+            learning_rate_input_multiplier = Double.parseDouble(args[2]);
+            epoch = Integer.parseInt(args[3]);
+            lambda = Double.parseDouble(args[4]);
+            learning_rate_decay = Double.parseDouble(args[5]);
+            use_linear_rho = Boolean.parseBoolean(args[6]);
+            use_rms_prop = Boolean.parseBoolean(args[7]);
+            rms_prop_factors = new double[]{Double.parseDouble(args[8]), Double.parseDouble(args[9])};
+            random_range = Double.parseDouble(args[10]);
+        }
+
+        switch(dataset_id){
+            case 0:
+                dataSet1 = MNISTReader.getMNIST_TOP();
+                dataSet2 = MNISTReader.getMNIST_BOTTOM();
+                break;
+            case 1:
+                dataSet1 = MSDReader.getSoundOnly();
+                dataSet2 = MSDReader.getLyricsOnly();
+                break;
+            case 2:
+                dataSet1 = PENDATAReader.getStatic();
+                dataSet2 = PENDATAReader.getDynamic();
+                break;
+            default:
+                dataSet1 = MNISTReader.getMNIST_TOP();
+                dataSet2 = MNISTReader.getMNIST_BOTTOM();
+        }
+
+
+//        dataSet1 = MNISTReader.getMNIST_TOP();          0
+//        dataSet2 = MNISTReader.getMNIST_BOTTOM();
+//
+//        dataSet1 = MSDReader.getSoundOnly();            1
+//        dataSet2 = MSDReader.getLyricsOnly();
+//
+//        dataSet1 = PENDATAReader.getStatic();           2
+//        dataSet2 = PENDATAReader.getDynamic();
+
+        System.out.println("File read");
+
         String s = "";
         s += "Dataset: " + dataSet1.name + "\n";
         s += "learning_rate: " + learning_rate +
