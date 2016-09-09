@@ -182,11 +182,31 @@ public class MSDReader {
         return new DataSet("MSD Sound only", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
     }
 
-
+	public static DataSet getLyricsOnly() throws FileNotFoundException, URISyntaxException {
+		getLyricsOnly(0);
+	}
+	
+	public ArrayList<Integer> readDensityIndexes(int minimumBarrier){
+		ArrayList<Integer> densityIndexes = new ArrayList<Integer>();
+		if(minimumBarrier != 0){
+			lyric_count = 0;
+			for(int i = 0; i < featureDensity.length; i++){
+				if(featureDensity[i] >= minimumBarrier){
+					densityIndexes.add(i);
+				}
+			}
+		}
+		return densityIndexes;
+	}
+	
     @SuppressWarnings("unused")
-    public static DataSet getLyricsOnly() throws FileNotFoundException, URISyntaxException {
+    public static DataSet getLyricsOnly(int minimumBarrier) throws FileNotFoundException, URISyntaxException {
         ArrayList<Instance> instances = new ArrayList<>();
-        File file = new File("datasets" + File.separator +
+		
+		int[] featureDensity = readFeatureDensity();
+		ArrayList<Integer> densityFilteredIndexes = readDensityIndexes(minimumBarrier);
+	 
+		File file = new File("datasets" + File.separator +
                 "msd_genre" + File.separator +
                 "msd.txt");
         Scanner scanner = new Scanner(file);
@@ -196,7 +216,7 @@ public class MSDReader {
 
         int class_count = sc2.nextInt();
         int sound_count = sc2.nextInt();
-        int lyric_count = sc2.nextInt();
+        int lyric_count = densityFilteredIndexes.size();
 
         while (scanner.hasNext()) {
             Instance instance = new Instance();
@@ -207,12 +227,14 @@ public class MSDReader {
             instance.r[Integer.parseInt(splits[0])] = 1;
             instance.x = new double[lyric_count];
             for (int i = 0; i < lyric_count; i++) {
-                instance.x[i] = Double.parseDouble(splits[sound_count + 1]);
+                instance.x[i] = Double.parseDouble(splits[sound_count + 1 + densityFilteredIndexes.get(i)]);
             }
             instances.add(instance);
             System.out.printf("\r%.2f", (instances.size() * 1.0) / 17495);
         }
         System.out.println();
+		
+		
 
         normalize(instances);
 
@@ -230,10 +252,18 @@ public class MSDReader {
 
         return new DataSet("MSD Lyrics only", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
     }
+	
+	
+    public static DataSet getBoth() throws FileNotFoundException, URISyntaxException {
+		getBoth(0);
+	}
 
     @SuppressWarnings("unused")
-    public static DataSet getBoth() throws FileNotFoundException, URISyntaxException {
+    public static DataSet getBoth(int minimumBarrier) throws FileNotFoundException, URISyntaxException {
         ArrayList<Instance> instances = new ArrayList<>();
+		
+		int[] featureDensity = readFeatureDensity();
+		ArrayList<Integer> densityFilteredIndexes = readDensityIndexes(minimumBarrier);
 
         File file = new File("datasets" + File.separator +
                 "msd_genre" + File.separator +
@@ -245,7 +275,7 @@ public class MSDReader {
 
         int class_count = sc2.nextInt();
         int sound_count = sc2.nextInt();
-        int lyric_count = sc2.nextInt();
+        int lyric_count = densityFilteredIndexes.size();
 
         while (scanner.hasNext()) {
             Instance instance = new Instance();
@@ -256,7 +286,10 @@ public class MSDReader {
             instance.r[Integer.parseInt(splits[0])] = 1;
             instance.x = new double[sound_count + lyric_count];
             for (int i = 0; i < sound_count + lyric_count; i++) {
-                instance.x[i] = Double.parseDouble(splits[1 + i]);
+				if(i < sound_count + 1)
+					instance.x[i] = Double.parseDouble(splits[1 + i]);
+				else
+					instance.x[i] = Double.parseDouble(splits[1 + sound_count + densityFilteredIndexes.get(i)]);
             }
 
             instances.add(instance);
@@ -304,6 +337,58 @@ public class MSDReader {
             }
         }
     }
+	
+	public void saveFeatureDensity() throws FileNotFoundException, URISyntaxException {
+		int[] featureDensity = new int[5000];
+		
+		File file = new File("datasets" + File.separator +
+                "msd_genre" + File.separator +
+                "msd.txt");
+        Scanner scanner = new Scanner(file);
+
+        String line = scanner.nextLine();
+        Scanner sc2 = new Scanner(line);
+
+        int class_count = sc2.nextInt();
+        int sound_count = sc2.nextInt();
+        int lyric_count = sc2.nextInt();
+
+		int row = 0;
+        while (scanner.hasNext()) {
+            line = scanner.nextLine();
+            String[] splits = line.split("\\s+");
+            for (int i = 0; i < lyric_count; i++) {
+				if(Double.parseDouble(splits[sound_count + 1]) > 0)
+					density[i]++;
+            }
+            System.out.printf("\r%.2f", (row++ * 1.0) / 17495);
+        }
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter("datasets" + File.separator +
+                "msd_genre" + File.separator + "featureDensity.txt"));
+
+				
+		for(int i = 0; i < lyric_count; i++){
+            writer.write(density[i] + " ");
+		}
+
+        writer.close();
+		
+	}
+	
+	public int[] readFeatureDensity(){
+		int[] featureDensity = new int[5000];
+		File file = new File("datasets" + File.separator +
+                "msd_genre" + File.separator +
+                "featureDensity.txt");
+        Scanner scanner = new Scanner(file);
+
+		int i = 0;
+        while (scanner.hasNextInt()) {
+            featureDensity[i++] = scanner.nextInt();
+        }
+	}
+	
 
     private static class MSDInstance {
         int class_value;
