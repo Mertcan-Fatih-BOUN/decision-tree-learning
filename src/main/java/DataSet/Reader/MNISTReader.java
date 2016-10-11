@@ -55,7 +55,7 @@ public class MNISTReader {
 
         normalize(tra, val);
 
-        return new DataSet("MNIST", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
+        return new DataSet("MNIST TOP", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
     }
 
     public static DataSet getMNIST_BOTTOM() throws URISyntaxException, IOException {
@@ -76,7 +76,7 @@ public class MNISTReader {
 
         normalize(tra, val);
 
-        return new DataSet("MNIST", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
+        return new DataSet("MNIST BOTTOM", tra, val, DataSet.TYPE.MULTI_CLASS_CLASSIFICATION);
     }
 
     public static DataSet getBoth() throws URISyntaxException, IOException {
@@ -167,10 +167,19 @@ public class MNISTReader {
             line = scanner.nextLine();
             s = line.split(splitter);
 
-            double[] attributes = new double[ATTRIBUTE_COUNT / 2];
+//            double[] attributes = new double[ATTRIBUTE_COUNT / 2];
+//            for (int i = 0; i < ATTRIBUTE_COUNT / 2; i++) {
+//                attributes[i] = Double.parseDouble(s[i]);
+//            }
+
+            double[] attributes = new double[ATTRIBUTE_COUNT];
             for (int i = 0; i < ATTRIBUTE_COUNT / 2; i++) {
                 attributes[i] = Double.parseDouble(s[i]);
             }
+            for (int i = ATTRIBUTE_COUNT / 2; i < ATTRIBUTE_COUNT; i++) {
+                attributes[i] = 0;
+            }
+
             String className = s[ATTRIBUTE_COUNT];
 
             int[] r = new int[10];
@@ -209,10 +218,19 @@ public class MNISTReader {
             line = scanner.nextLine();
             s = line.split(splitter);
 
-            double[] attributes = new double[ATTRIBUTE_COUNT / 2];
+//            double[] attributes = new double[ATTRIBUTE_COUNT / 2];
+//            for (int i = ATTRIBUTE_COUNT / 2; i < ATTRIBUTE_COUNT; i++) {
+//                attributes[i - ATTRIBUTE_COUNT / 2] = Double.parseDouble(s[i]);
+//            }
+
+            double[] attributes = new double[ATTRIBUTE_COUNT];
+            for (int i = 0; i < ATTRIBUTE_COUNT / 2; i++) {
+                attributes[i] = 0;
+            }
             for (int i = ATTRIBUTE_COUNT / 2; i < ATTRIBUTE_COUNT; i++) {
                 attributes[i] = Double.parseDouble(s[i]);
             }
+
             String className = s[ATTRIBUTE_COUNT];
 
             int[] r = new int[10];

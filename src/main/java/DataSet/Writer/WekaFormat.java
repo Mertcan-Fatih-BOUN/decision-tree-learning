@@ -22,9 +22,9 @@ public class WekaFormat {
         attributeCount = dataSet.TRAINING_INSTANCES.get(0).x.length;
     }
 
-    public void outputARFFFile(){
-        System.out.println("Writing Training File");
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("datasets" + File.separator + "arffs" + File.separator + dataSet.getName() + "_training.arff"))) {
+    public synchronized void outputARFFFile(){
+        System.out.println("Writing Training File " + "datasets" + File.separator + "arffsFreq" + File.separator + dataSet.getName() + "_training.arff");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("datasets" + File.separator + "arffsFreq" + File.separator + dataSet.getName() + "_training.arff"))) {
             writeHeaders(writer, TRAINING);
             writeData(writer, TRAINING);
         } catch (UnsupportedEncodingException e) {
@@ -35,8 +35,8 @@ public class WekaFormat {
             e.printStackTrace();
         }
 
-        System.out.println("Writing Test File");
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("datasets" + File.separator + "arffs" + File.separator + dataSet.getName() + "_test.arff"))) {
+        System.out.println("Writing Test File " + "datasets" + File.separator + "arffsFreq" + File.separator + dataSet.getName() + "_test.arff");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("datasets" + File.separator + "arffsFreq" + File.separator + dataSet.getName() + "_test.arff"))) {
             writeHeaders(writer, TEST);
             writeData(writer, TEST);
         } catch (UnsupportedEncodingException e) {

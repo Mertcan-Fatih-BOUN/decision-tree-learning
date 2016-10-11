@@ -341,7 +341,7 @@ class Node {
         if (leftNode == null || gamma == 1)
             return 1;
         else
-            return gamma + (1 - gamma) * (leftNode.myEffSize() + rightNode.myEffSize());
+            return 1 + (1 - gamma) * (leftNode.myEffSize() + rightNode.myEffSize());
     }
 
 

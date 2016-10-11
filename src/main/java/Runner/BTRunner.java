@@ -18,19 +18,20 @@ public class BTRunner {
     public static void main(String[] args) throws IOException, URISyntaxException {
         DataSet dataSet = null;
 
-        int dataset_id = 1;
+        int dataset_id = 11;
         double learning_rate = 0.01;
         double learning_rate_input_multiplier = 1;
         int epoch = 15;
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
-        boolean use_multi_modal = true;
+        boolean use_multi_modal = false;
         boolean use_rms_prop = false;
         double[] rms_prop_factors = new double[]{0.9, 0.1};
         double random_range = 0.001;
+        int frequency = 2500;
 
-        if (args.length == 12) {
+        if (args.length >= 12) {
             dataset_id = Integer.parseInt(args[0]);
             learning_rate = Double.parseDouble(args[1]);
             learning_rate_input_multiplier = Double.parseDouble(args[2]);
@@ -42,6 +43,9 @@ public class BTRunner {
             use_rms_prop = Boolean.parseBoolean(args[8]);
             rms_prop_factors = new double[]{Double.parseDouble(args[9]), Double.parseDouble(args[10])};
             random_range = Double.parseDouble(args[11]);
+            if(args.length > 12){
+                frequency = Integer.parseInt(args[12]);
+            }
         }
 
         switch(dataset_id){
@@ -74,6 +78,12 @@ public class BTRunner {
                 break;
             case 9:
                 dataSet = PENDATAReader.getBoth();
+                break;
+            case 10:
+                dataSet = MSDReader.getLyricsOnly(frequency);
+                break;
+            case 11:
+                dataSet = MSDReader.getBoth(frequency);
                 break;
             default:
                 dataSet = MNISTReader.getMNIST();
@@ -156,5 +166,20 @@ public class BTRunner {
             }
         }
 
+    }
+
+    public static DataSet getMSDGenreWithFrequency(int mode, int frequency) throws IOException, URISyntaxException {
+        switch (mode){
+            case 1:
+                return MSDReader.getLyricsOnly(frequency);
+            case 2:
+                return MSDReader.getBoth(frequency);
+            case 3:
+                return MSDReader.getSoundOnlyFilled0(frequency);
+            case 4:
+                return MSDReader.getLyricsOnlyFilled0(frequency);
+            default:
+                return null;
+        }
     }
 }

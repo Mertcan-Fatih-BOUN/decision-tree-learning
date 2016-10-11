@@ -24,18 +24,19 @@ public class DoubleBTRunner {
         DataSet dataSet1 = null;
         DataSet dataSet2 = null;
 
-        int dataset_id = 1;
-        double learning_rate = 0.1;
+        int dataset_id = 3;
+        double learning_rate = 0.01;
         double learning_rate_input_multiplier = 1;
         int epoch = 15;
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
-        boolean use_rms_prop = true;
+        boolean use_rms_prop = false;
         double[] rms_prop_factors = new double[]{0.9, 0.1};
         double random_range = 0.001;
+        int featureLimit = 250;
 
-        if (args.length == 11) {
+        if (args.length >= 11) {
             dataset_id = Integer.parseInt(args[0]);
             learning_rate = Double.parseDouble(args[1]);
             learning_rate_input_multiplier = Double.parseDouble(args[2]);
@@ -46,6 +47,8 @@ public class DoubleBTRunner {
             use_rms_prop = Boolean.parseBoolean(args[7]);
             rms_prop_factors = new double[]{Double.parseDouble(args[8]), Double.parseDouble(args[9])};
             random_range = Double.parseDouble(args[10]);
+            if(args.length > 11)
+                featureLimit = Integer.parseInt(args[11]);
         }
 
         switch(dataset_id){
@@ -60,6 +63,10 @@ public class DoubleBTRunner {
             case 2:
                 dataSet1 = PENDATAReader.getStatic();
                 dataSet2 = PENDATAReader.getDynamic();
+                break;
+            case 3:
+                dataSet1 = MSDReader.getSoundOnly();
+                dataSet2 = MSDReader.getLyricsOnly(featureLimit);
                 break;
             default:
                 dataSet1 = MNISTReader.getMNIST_TOP();
