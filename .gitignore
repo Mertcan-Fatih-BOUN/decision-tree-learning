@@ -2,7 +2,6 @@
 out
 *.iml
 
-datasets/mirflicker_github
-datasets/mnist
-datasets/msd_genre
-datasets/mirflickr
+datasets/
+run_results/
+!datasets/README.MD
