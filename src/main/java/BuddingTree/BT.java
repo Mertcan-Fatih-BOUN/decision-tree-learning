@@ -23,6 +23,7 @@ public class BT implements Evaluable {
 
     boolean user_multi_modal = false;
     boolean use_linear_rho = false;
+    boolean use_multi_modal_rho = false;
     boolean use_rms_prop = false;
     double[] rms_prop_factors = new double[]{1, 1};
 
@@ -50,9 +51,10 @@ public class BT implements Evaluable {
      * @param enable_multi_modal Whether the BT will use multi-modal model
      * @param random_range       [-random_range random_range] is the initial value of variables
      */
-    public BT(DataSet dataSet, boolean use_linear_rho, boolean enable_multi_modal, double random_range, boolean use_rms_prop, double[] rms_prop_factors, BufferedWriter output) {
+    public BT(DataSet dataSet, boolean use_linear_rho, boolean enable_multi_modal, boolean enable_multi_modal_rho, double random_range, boolean use_rms_prop, double[] rms_prop_factors, BufferedWriter output) {
         this.use_linear_rho = use_linear_rho;
         this.user_multi_modal = enable_multi_modal;
+        this.use_multi_modal_rho = enable_multi_modal_rho;
         this.use_rms_prop = use_rms_prop;
         if (use_rms_prop)
             this.rms_prop_factors = rms_prop_factors;
@@ -161,20 +163,29 @@ public class BT implements Evaluable {
     }
 
     private void writeBestResult(String ss) {
-        String fileName = "run_results\\BT\\" + dataSet.name + "\\";
+        String fileName = "run_results_deneme\\BT\\" + dataSet.name + "\\";
         if(use_rms_prop){
             fileName += "rms_prop\\";
         }else{
             fileName += "no_rms_prop\\";
         }
-        if(use_linear_rho && !user_multi_modal){
+
+        if (use_linear_rho && !user_multi_modal && !use_multi_modal_rho) {
             fileName += "linear_rho\\";
-        }else if(!use_linear_rho && user_multi_modal){
+        } else if (!use_linear_rho && user_multi_modal && !use_multi_modal_rho) {
             fileName += "multi_modal\\";
-        }else if(!use_linear_rho && !user_multi_modal){
+        } else if (!use_linear_rho && !user_multi_modal && !use_multi_modal_rho) {
             fileName += "base_model\\";
-        }else{
+        } else if (use_linear_rho && user_multi_modal && !use_multi_modal_rho){
             fileName += "linear_and_multimodal\\";
+        }else if (use_linear_rho && !user_multi_modal && use_multi_modal_rho) {
+            fileName += "linear_rho_and_multimodalrho\\";
+        } else if (!use_linear_rho && user_multi_modal && use_multi_modal_rho) {
+            fileName += "multi_modal_and_multimodalrho\\";
+        } else if (!use_linear_rho && !user_multi_modal && use_multi_modal_rho) {
+            fileName += "multimodalrho\\";
+        } else if (use_linear_rho && user_multi_modal && use_multi_modal_rho){
+            fileName += "linear_and_multimodal_and_multimodalrho\\";
         }
 
         fileName += "bestresults\\" + dataSet.name + ".txt";

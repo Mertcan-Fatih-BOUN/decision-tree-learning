@@ -62,8 +62,8 @@ public class DoubleBT implements MultiEvaluable {
         if(dataSet1.TRAINING_INSTANCES.size() != dataSet2.TRAINING_INSTANCES.size()){
             System.out.println("Error in datasets.");
         }else {
-            bt1 = new BT(dataSet1, use_linear_rho, false, random_range, use_rms_prop, rms_prop_factors, null);
-            bt2 = new BT(dataSet2, use_linear_rho, false, random_range, use_rms_prop, rms_prop_factors, null);
+            bt1 = new BT(dataSet1, use_linear_rho, false, false, random_range, use_rms_prop, rms_prop_factors, null);
+            bt2 = new BT(dataSet2, use_linear_rho, false, false, random_range, use_rms_prop, rms_prop_factors, null);
         }
     }
 

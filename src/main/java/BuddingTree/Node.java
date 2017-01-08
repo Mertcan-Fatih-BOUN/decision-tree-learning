@@ -26,10 +26,19 @@ class Node {
     /**
      * Leaf response for standard version and constant term for linear_rho version
      */
-    private double[] rho0;
-    private double[] gradient_rho0;
-    private double[] sum_grad_rho0;
+    private double[][] rho0;
+    private double[][] gradient_rho0;
+    private double[][] sum_grad_rho0;
 
+    private double[] P1_rho;
+    private double[] P2_rho;
+
+
+    private double[] gradient_P1_rho;
+    private double[] gradient_P2_rho;
+
+    private double[] sum_grad_P1_rho;
+    private double[] sum_grad_P2_rho;
     /**
      * Leafness parameter
      */
@@ -70,6 +79,9 @@ class Node {
 
     private double g1;
     private double g2;
+
+    private double[] rho1;
+    private double[] rho2;
 
 
     private double[] g;
@@ -117,6 +129,29 @@ class Node {
         Arrays.fill(sum_grad_P1, 0);
         Arrays.fill(sum_grad_P2, 0);
 
+        P1_rho = new double[tree.CLASS_COUNT];
+        P2_rho = new double[tree.CLASS_COUNT];
+        gradient_P1_rho = new double[tree.CLASS_COUNT];
+        gradient_P2_rho = new double[tree.CLASS_COUNT];
+        sum_grad_P1_rho = new double[tree.CLASS_COUNT];
+        sum_grad_P2_rho = new double[tree.CLASS_COUNT];
+
+
+        rho1 = new double[tree.CLASS_COUNT];
+        rho2 = new double[tree.CLASS_COUNT];
+
+
+        Arrays.fill(P1_rho, 0.5);
+        Arrays.fill(P2_rho, 0.5);
+        Arrays.fill(gradient_P1_rho, 0);
+        Arrays.fill(gradient_P2_rho, 0);
+        Arrays.fill(sum_grad_P1_rho, 0);
+        Arrays.fill(sum_grad_P2_rho, 0);
+
+
+        Arrays.fill(rho1, 0);
+        Arrays.fill(rho2, 0);
+
 
         if (tree.use_linear_rho) {
             rho = new double[tree.CLASS_COUNT][tree.ATTRIBUTE_COUNT];
@@ -131,14 +166,21 @@ class Node {
             }
         }
 
-        rho0 = new double[tree.CLASS_COUNT];
-        sum_grad_rho0 = new double[tree.CLASS_COUNT];
-        gradient_rho0 = new double[tree.CLASS_COUNT];
+        rho0 = new double[1][tree.CLASS_COUNT];
+        sum_grad_rho0 = new double[1][tree.CLASS_COUNT];
+        gradient_rho0 = new double[1][tree.CLASS_COUNT];
+        if(tree.use_multi_modal_rho) {
+            rho0 = new double[2][tree.CLASS_COUNT];
+            sum_grad_rho0 = new double[2][tree.CLASS_COUNT];
+            gradient_rho0 = new double[2][tree.CLASS_COUNT];
+        }
 
         for (int i = 0; i < rho0.length; i++) {
-            rho0[i] = rand(-tree.RANDOM_RANGE, tree.RANDOM_RANGE);
-            sum_grad_rho0[i] = 0;
-            gradient_rho0[i] = 0;
+            for(int j = 0; j < rho0[0].length; j++){
+                rho0[i][j] = rand(-tree.RANDOM_RANGE, tree.RANDOM_RANGE);
+                sum_grad_rho0[i][j] = 0;
+                gradient_rho0[i][j] = 0;
+            }
         }
 
         y = new double[tree.CLASS_COUNT];
@@ -180,21 +222,68 @@ class Node {
 
     double[] F(Instance instance) {
         if (leftNode == null) {
+            Arrays.fill(rho1, 0);
+            Arrays.fill(rho2, 0);
             for (int i = 0; i < y.length; i++) {
-                if (tree.use_linear_rho)
-                    y[i] = this.gamma * (dotProduct(instance.x, rho[i]) + rho0[i]);
-                else
-                    y[i] = this.gamma * rho0[i];
+                if(tree.use_multi_modal_rho) {
+                    if(tree.use_linear_rho){
+                        int lenght = instance.x.length;
+                        int firstmodal_size = tree.dataSet.first_modal_size;
+                        for (int j = 0; j < lenght; j++) {
+                            if (j < firstmodal_size) {
+                                rho1[i] += rho[i][j] * instance.x[j];
+                            } else {
+                                rho2[i] += rho[i][j] * instance.x[j];
+                            }
+                        }
+                        rho1[i] += rho0[0][i];
+                        rho2[i] += rho0[1][i];
+                        y[i] = this.gamma * (P1_rho[i] * rho1[i] + P2_rho[i] * rho2[i]) / (P1_rho[i] + P2_rho[i]);
+                    }else {
+                        rho1[i] = rho0[0][i];
+                        rho2[i] = rho0[1][i];
+                        y[i] = this.gamma * (P1_rho[i] * rho1[i] + P2_rho[i] * rho2[i]) / (P1_rho[i] + P2_rho[i]);
+                    }
+                }else{
+                    if (tree.use_linear_rho)
+                        y[i] = this.gamma * (dotProduct(instance.x, rho[i]) + rho0[0][i]);
+                    else
+                        y[i] = this.gamma * rho0[0][i];
+                }
+
             }
         } else {
             leftNode.F(instance);
             rightNode.F(instance);
+            Arrays.fill(rho1, 0);
+            Arrays.fill(rho2, 0);
             for (int i = 0; i < y.length; i++) {
                 g(instance);
-                if (tree.use_linear_rho)
-                    y[i] = (1 - gamma) * ((g[i] * leftNode.y[i]) + ((1 - g[i]) * rightNode.y[i])) + gamma * (dotProduct(instance.x, rho[i]) + rho0[i]);
-                else
-                    y[i] = (1 - gamma) * ((g[i] * leftNode.y[i]) + ((1 - g[i]) * rightNode.y[i])) + gamma * rho0[i];
+                if(tree.use_multi_modal_rho){
+                    if(tree.use_linear_rho){
+                        int lenght = instance.x.length;
+                        int firstmodal_size = tree.dataSet.first_modal_size;
+                        for (int j = 0; j < lenght; j++) {
+                            if (j < firstmodal_size) {
+                                rho1[i] += rho[i][j] * instance.x[j];
+                            } else {
+                                rho2[i] += rho[i][j] * instance.x[j];
+                            }
+                        }
+                        rho1[i] += rho0[0][i];
+                        rho2[i] += rho0[1][i];
+                        y[i] = (1 - gamma) * ((g[i] * leftNode.y[i]) + ((1 - g[i]) * rightNode.y[i])) + this.gamma * (P1_rho[i] * rho1[i] + P2_rho[i] * rho2[i]) / (P1_rho[i] + P2_rho[i]);
+                    }else {
+                        rho1[i] = rho0[0][i];
+                        rho2[i] = rho0[1][i];
+                        y[i] = (1 - gamma) * ((g[i] * leftNode.y[i]) + ((1 - g[i]) * rightNode.y[i])) + this.gamma * (P1_rho[i] * rho1[i] + P2_rho[i] * rho2[i]) / (P1_rho[i] + P2_rho[i]);
+                    }
+                }else{
+                    if (tree.use_linear_rho)
+                        y[i] = (1 - gamma) * ((g[i] * leftNode.y[i]) + ((1 - g[i]) * rightNode.y[i])) + gamma * (dotProduct(instance.x, rho[i]) + rho0[0][i]);
+                    else
+                        y[i] = (1 - gamma) * ((g[i] * leftNode.y[i]) + ((1 - g[i]) * rightNode.y[i])) + gamma * rho0[0][i];
+                }
             }
         }
         return y;
@@ -294,6 +383,14 @@ class Node {
         for (int i = 0; i < tree.CLASS_COUNT; i++)
             gradient_P2[i] += delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * ((g2 * (P1[i] + P2[i]) - (P1[i] * g1 + P2[i] * g2)) / ((P1[i] + P2[i]) * (P1[i] + P2[i])));
 
+        Arrays.fill(gradient_P1_rho, 0);
+        for (int i = 0; i < tree.CLASS_COUNT; i++)
+            gradient_P1_rho[i] += delta[i] * gamma * ((rho1[i] * (P1_rho[i] + P2_rho[i]) - (P1_rho[i] * rho1[i] + P2_rho[i] * rho2[i])) / ((P1_rho[i] + P2_rho[i]) * (P1_rho[i] + P2_rho[i])));
+
+        Arrays.fill(gradient_P2_rho, 0);
+        for (int i = 0; i < tree.CLASS_COUNT; i++)
+            gradient_P2_rho[i] += delta[i] * gamma * ((rho2[i] * (P1_rho[i] + P2_rho[i]) - (P1_rho[i] * rho1[i] + P2_rho[i] * rho2[i])) / ((P1_rho[i] + P2_rho[i]) * (P1_rho[i] + P2_rho[i])));
+
         //Budding Trees paper derivative of J respect to w
         gradient_w0 = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
@@ -314,20 +411,41 @@ class Node {
         if (tree.use_linear_rho) {
             for (int i = 0; i < tree.CLASS_COUNT; i++) {
                 for (int j = 0; j < tree.ATTRIBUTE_COUNT; j++) {
-                    gradient_rho[i][j] = delta[i] * gamma * instance.x[j];
+                    if(tree.use_multi_modal_rho){
+                        int firstmodal_size = tree.dataSet.first_modal_size;
+                        //Project report equation 10
+                        if (i < firstmodal_size)
+                            gradient_rho[i][j] += delta[i] * gamma * (P1_rho[i] / (P1_rho[i] + P2_rho[i])) * instance.x[j];
+                        else
+                            gradient_rho[i][j] += delta[i] * gamma * (P2_rho[i] / (P1_rho[i] + P2_rho[i])) * instance.x[j];
+                    }else
+                        gradient_rho[i][j] = delta[i] * gamma * instance.x[j];
                 }
             }
         }
 
         //Budding tree paper, derivative of J respect to rho
-        for (int i = 0; i < tree.CLASS_COUNT; i++) {
-            gradient_rho0[i] = delta[i] * gamma;
+        for(int i = 0; i < rho0.length; i++){
+            for (int j = 0; j < tree.CLASS_COUNT; j++) {
+                if(tree.use_multi_modal_rho){
+                    if(i == 0)
+                         gradient_rho0[i][j] += delta[j] * gamma * (P1_rho[j] / (P1_rho[j] + P2_rho[j]));
+                    else if(i == 1)
+                        gradient_rho0[i][j] += delta[j] * gamma * (P2_rho[j] / (P1_rho[j] + P2_rho[j]));
+                }else
+                    gradient_rho0[0][j] = delta[j] * gamma;
+            }
         }
 
         //Budding tree paper, derivatinve of J respect to gamma
         gradient_gamma = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
-            gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + rho0[i]) - tree.LAMBDA;
+            if(tree.use_multi_modal_rho)
+                gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + (P1_rho[i] * rho1[i] + P2_rho[i] * rho2[i])/(P1_rho[i] + P2_rho[i])) - tree.LAMBDA;
+            else if(tree.use_linear_rho)
+                gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + (dotProduct(instance.x, rho[i]) + rho0[0][i])) - tree.LAMBDA;
+            else
+                gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + rho0[0][i]) - tree.LAMBDA;
     }
 
     int size() {
@@ -364,6 +482,15 @@ class Node {
             sum_grad_w01 = tree.rms_prop_factors[0] * sum_grad_w01 + tree.rms_prop_factors[1] * gradient_w01 * gradient_w01;
         }
 
+
+        for (int i = 0; i < sum_grad_P1_rho.length; i++) {
+            sum_grad_P1_rho[i] = tree.rms_prop_factors[0] * sum_grad_P1_rho[i] + tree.rms_prop_factors[1] * gradient_P1_rho[i] * gradient_P1_rho[i];
+        }
+
+        for (int i = 0; i < sum_grad_P2_rho.length; i++) {
+            sum_grad_P2_rho[i] = tree.rms_prop_factors[0] * sum_grad_P2_rho[i] + tree.rms_prop_factors[1] * gradient_P2_rho[i] * gradient_P2_rho[i];
+        }
+
         sum_grad_w0 = tree.rms_prop_factors[0] * sum_grad_w0 + tree.rms_prop_factors[1] * gradient_w0 * gradient_w0;
 
         if (tree.use_linear_rho) {
@@ -375,7 +502,9 @@ class Node {
         }
 
         for (int i = 0; i < sum_grad_rho0.length; i++) {
-            sum_grad_rho0[i] = tree.rms_prop_factors[0] * sum_grad_rho0[i] + tree.rms_prop_factors[1] * gradient_rho0[i] * gradient_rho0[i];
+            for(int j = 0; j < sum_grad_rho0[0].length; j++){
+                sum_grad_rho0[i][j] = tree.rms_prop_factors[0] * sum_grad_rho0[i][j] + tree.rms_prop_factors[1] * gradient_rho0[i][j] * gradient_rho0[i][j];
+            }
         }
 
         sum_grad_gamma = tree.rms_prop_factors[0] * sum_grad_gamma + tree.rms_prop_factors[1] * gradient_gamma * gradient_gamma;
@@ -408,6 +537,17 @@ class Node {
                     P2[i] = P2[i] - tree.LEARNING_RATE * gradient_P2[i] / Math.sqrt(sum_grad_P2[i]);
             }
         }
+
+        for (int i = 0; i < sum_grad_P1_rho.length; i++) {
+            if (sum_grad_P1_rho[i] != 0)
+                P1_rho[i] = P1_rho[i] - tree.LEARNING_RATE * gradient_P1_rho[i] / Math.sqrt(sum_grad_P1_rho[i]);
+        }
+
+        for (int i = 0; i < sum_grad_P2_rho.length; i++) {
+            if (sum_grad_P2_rho[i] != 0)
+                P2_rho[i] = P2_rho[i] - tree.LEARNING_RATE * gradient_P2_rho[i] / Math.sqrt(sum_grad_P2_rho[i]);
+        }
+
         if (sum_grad_gamma != 0)
             setGamma(gamma - tree.LEARNING_RATE * gradient_gamma / Math.sqrt(sum_grad_gamma));
 
@@ -422,8 +562,10 @@ class Node {
         }
 
         for (int i = 0; i < sum_grad_rho0.length; i++) {
-            if (sum_grad_rho0[i] != 0)
-                rho0[i] = rho0[i] - tree.LEARNING_RATE * gradient_rho0[i] / Math.sqrt(sum_grad_rho0[i]);
+            for (int j = 0; j < sum_grad_rho0[0].length; j++) {
+                if (sum_grad_rho0[i][j] != 0)
+                    rho0[i][j] = rho0[i][j] - tree.LEARNING_RATE * gradient_rho0[i][j] / Math.sqrt(sum_grad_rho0[i][j]);
+            }
         }
 
 
