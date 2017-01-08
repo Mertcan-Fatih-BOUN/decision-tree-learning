@@ -21,3 +21,7 @@ Put datasets here.
     Then merge them by using MSDReader class
     http://labrosa.ee.columbia.edu/millionsong/musixmatch
     http://labrosa.ee.columbia.edu/millionsong/blog/11-2-28-deriving-genre-dataset
+	featureDensity  https://drive.google.com/open?id=0B3i2ealQMHfyOXFDTTMxZHlnSGs
+	
+###### PENDATA
+	dyndep-08  dynind-08 stadep16 staind16
