@@ -32,8 +32,8 @@ public class BatchGenerator {
     public static void main(String[] args) throws IOException {
         generateBatchesForNormalBT();
         generateBatchesForNormalLinearBT();
-        //generateBatchesForNormalMutliGatingBT();
-        //generateBatchesForLinearMutliGatingBT();
+        generateBatchesForNormalMutliGatingBT();
+        generateBatchesForLinearMutliGatingBT();
         generateBatchesForNormalDoubleBT();
         generateBatchesForLinearDoubleBT();
     }
@@ -114,6 +114,9 @@ public class BatchGenerator {
         for(int i = 1; i < 12; i++){
             if(i > 4 && i < 7)
                 continue;
+            if((i == 1 || i == 2 || i== 4 || i == 5 || i == 7 || i == 8 || i == 10) && use_multi_modal){
+                continue;
+            }
             boolean generate_frequecy = false;
             if(i > 9){
                 generate_frequecy = true;
