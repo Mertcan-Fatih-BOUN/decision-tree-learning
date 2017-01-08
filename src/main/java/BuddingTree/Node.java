@@ -327,7 +327,10 @@ class Node {
         //Budding tree paper, derivatinve of J respect to gamma
         gradient_gamma = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
-            gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + rho0[i]) - tree.LAMBDA;
+            if(tree.use_linear_rho)
+                gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + (dotProduct(instance.x, rho[i]) + rho0[i])) - tree.LAMBDA;
+            else
+                gradient_gamma += delta[i] * ((-g[i] * left_y[i]) - (1 - g[i]) * right_y[i] + rho0[i]) - tree.LAMBDA;
     }
 
     int size() {
