@@ -89,6 +89,7 @@ public class DoubleBT implements MultiEvaluable {
         this.bt2.LEARNING_RATE_INPUT_MULTIPLIER = learning_rate_input_multiplier;
         this.bt2.LAMBDA = lambda;
 
+        long timestamp = System.currentTimeMillis();
         for (int e = 0; e <= epoch; e++) {
             if (this.type == DataSet.TYPE.MULTI_LABEL_CLASSIFICATION) {
                 MAPError mapErrorX = getMAP_P50_error(this, dataSet1.TRAINING_INSTANCES, dataSet2.TRAINING_INSTANCES);
@@ -140,7 +141,12 @@ public class DoubleBT implements MultiEvaluable {
             } else if (this.type == DataSet.TYPE.REGRESSION)
                 System.out.printf("TO-DO");
 
-
+            long currentTimestamp = System.currentTimeMillis();
+            if(currentTimestamp > timestamp + 1000*60*45){
+                break;
+            }else{
+                timestamp = currentTimestamp;
+            }
 
             Collections.shuffle(dataSet1.TRAINING_INSTANCES, Util.generator);
             Collections.shuffle(dataSet2.TRAINING_INSTANCES, Util.generator);

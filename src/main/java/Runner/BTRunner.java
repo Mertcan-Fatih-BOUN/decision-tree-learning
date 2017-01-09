@@ -18,7 +18,7 @@ public class BTRunner {
     public static void main(String[] args) throws IOException, URISyntaxException {
         DataSet dataSet = null;
 
-        int dataset_id = 3;
+        int dataset_id = 9;
         double learning_rate = 0.1;
         double learning_rate_input_multiplier = 1;
         int epoch = 15;

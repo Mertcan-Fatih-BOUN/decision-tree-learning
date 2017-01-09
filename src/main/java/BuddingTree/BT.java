@@ -93,7 +93,7 @@ public class BT implements Evaluable {
         this.LEARNING_RATE_INPUT_MULTIPLIER = learning_rate_input_multiplier;
         this.LAMBDA = lambda;
 
-
+        long timestamp = System.currentTimeMillis();
         for (int e = 0; e <= epoch; e++) {
             if (this.type == DataSet.TYPE.MULTI_LABEL_CLASSIFICATION) {
                 MAPError mapErrorX = getMAP_P50_error(this, X);
@@ -150,6 +150,13 @@ public class BT implements Evaluable {
                     output.write(s);
                     output.flush();
                 }
+            }
+
+            long currentTimestamp = System.currentTimeMillis();
+            if(currentTimestamp > timestamp + 1000*60*45){
+                break;
+            }else{
+                timestamp = currentTimestamp;
             }
 
             Collections.shuffle(X, Util.generator);
