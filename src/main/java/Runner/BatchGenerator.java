@@ -30,7 +30,25 @@ public class BatchGenerator {
     static int[] frequency = new int[]{250, 500, 1000, 2500, 5000};
     static int frequency_ = 250;
 
+    static String fullContent = "";
+    static boolean writeLock = true;
+
     public static void main(String[] args) throws IOException {
+        writeLock = true;
+        generateOneBatFile();
+
+        /*writeLock = false;
+        generateBatchesForNormalBT();
+        generateBatchesForNormalLinearBT();
+        generateBatchesForNormalMutliGatingBT();
+        generateBatchesForLinearMutliGatingBT();
+        generateBatchesForNormalWeightedMutliGatingBT();
+        generateBatchesForLinearWeightedMutliGatingBT();
+        generateBatchesForNormalDoubleBT();
+        generateBatchesForLinearDoubleBT();*/
+    }
+
+    private static void generateOneBatFile() throws IOException {
         generateBatchesForNormalBT();
         generateBatchesForNormalLinearBT();
         generateBatchesForNormalMutliGatingBT();
@@ -39,15 +57,28 @@ public class BatchGenerator {
         generateBatchesForLinearWeightedMutliGatingBT();
         generateBatchesForNormalDoubleBT();
         generateBatchesForLinearDoubleBT();
+
+        writeLock = false;
+        writeToFile("AllinOne", "", fullContent);
     }
 
     public static String generateStringForRun(){
-        String run = "start \"dt\" /b java -cp log Runner.BTRunner %d %.4f %.4f %d %.4f %.4f %s %s %s %s %.4f %.4f %.4f %d> nul";
+        String run = "";
+        if(writeLock){
+            run = "start \"dt\" /b /WAIT java -cp log Runner.BTRunner %d %.4f %.4f %d %.4f %.4f %s %s %s %s %.4f %.4f %.4f %d> nul";
+        }else{
+            run = "start \"dt\" /b java -cp log Runner.BTRunner %d %.4f %.4f %d %.4f %.4f %s %s %s %s %.4f %.4f %.4f %d> nul";
+        }
         return String.format(Locale.ENGLISH, run, dataset_id, learning_rate, learning_rate_input_multiplier, epoch, lambda, learning_rate_decay, use_linear_rho, use_multi_modal, user_weighted_alpha, use_rms_prop, rms_prop_factors[0], rms_prop_factors[1], random_range, frequency_);
     }
 
     public static String generateStringForRunDoubleBT(){
-        String run = "start \"dt\" /b java -cp log Runner.DoubleBTRunner %d %.4f %.4f %d %.4f %.4f %s %s %.4f %.4f %.4f %d> nul";
+        String run = "";
+        if(writeLock){
+            run = "start \"dt\" /b /WAIT java -cp log Runner.DoubleBTRunner %d %.4f %.4f %d %.4f %.4f %s %s %.4f %.4f %.4f %d> nul";
+        }else{
+            run = "start \"dt\" /b java -cp log Runner.DoubleBTRunner %d %.4f %.4f %d %.4f %.4f %s %s %.4f %.4f %.4f %d> nul";
+        }
         return String.format(Locale.ENGLISH, run, dataset_id, learning_rate, learning_rate_input_multiplier, epoch, lambda, learning_rate_decay, use_linear_rho, use_rms_prop, rms_prop_factors[0], rms_prop_factors[1], random_range, frequency_);
     }
 
@@ -213,19 +244,23 @@ public class BatchGenerator {
     }
 
     public static void writeToFile(String filename_suffix, String filename, String content) throws IOException {
-        String fileName = "batches\\" + filename_suffix + "\\batch" + filename + ".bat";
-        BufferedWriter output = null;
-        try {
-            File file = new File(fileName);
-            file.getParentFile().mkdirs();
-            output = new BufferedWriter(new FileWriter(file));
-            output.write(content);
-            output.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (output != null) {
-                output.close();
+        if(writeLock){
+            fullContent += content + "\n\n";
+        }else {
+            String fileName = "batches\\" + filename_suffix + "\\batch" + filename + ".bat";
+            BufferedWriter output = null;
+            try {
+                File file = new File(fileName);
+                file.getParentFile().mkdirs();
+                output = new BufferedWriter(new FileWriter(file));
+                output.write(content);
+                output.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (output != null) {
+                    output.close();
+                }
             }
         }
     }
