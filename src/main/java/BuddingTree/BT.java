@@ -21,8 +21,9 @@ public class BT implements Evaluable {
     double bestResult = 0;
     long id;
 
-    boolean user_multi_modal = false;
-    boolean use_linear_rho = false;
+    boolean user_multi_modal = true;
+    boolean use_linear_rho = true;
+    boolean user_weighted_alpha = false;
     boolean use_rms_prop = false;
     double[] rms_prop_factors = new double[]{1, 1};
 
@@ -50,9 +51,10 @@ public class BT implements Evaluable {
      * @param enable_multi_modal Whether the BT will use multi-modal model
      * @param random_range       [-random_range random_range] is the initial value of variables
      */
-    public BT(DataSet dataSet, boolean use_linear_rho, boolean enable_multi_modal, double random_range, boolean use_rms_prop, double[] rms_prop_factors, BufferedWriter output) {
+    public BT(DataSet dataSet, boolean use_linear_rho, boolean enable_multi_modal, boolean user_weighted_alpha, double random_range, boolean use_rms_prop, double[] rms_prop_factors, BufferedWriter output) {
         this.use_linear_rho = use_linear_rho;
         this.user_multi_modal = enable_multi_modal;
+        this.user_weighted_alpha = user_weighted_alpha;
         this.use_rms_prop = use_rms_prop;
         if (use_rms_prop)
             this.rms_prop_factors = rms_prop_factors;
@@ -167,6 +169,11 @@ public class BT implements Evaluable {
         }else{
             fileName += "no_rms_prop\\";
         }
+
+        if(user_weighted_alpha){
+            fileName += "weighted_average_and_";
+        }
+
         if(use_linear_rho && !user_multi_modal){
             fileName += "linear_rho\\";
         }else if(!use_linear_rho && user_multi_modal){

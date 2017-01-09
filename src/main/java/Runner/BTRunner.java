@@ -18,20 +18,21 @@ public class BTRunner {
     public static void main(String[] args) throws IOException, URISyntaxException {
         DataSet dataSet = null;
 
-        int dataset_id = 11;
-        double learning_rate = 0.01;
+        int dataset_id = 3;
+        double learning_rate = 0.1;
         double learning_rate_input_multiplier = 1;
         int epoch = 15;
         double lambda = 0.0001;
         double learning_rate_decay = 0.99;
         boolean use_linear_rho = false;
         boolean use_multi_modal = false;
+        boolean user_weighted_alpha = false;
         boolean use_rms_prop = false;
         double[] rms_prop_factors = new double[]{0.9, 0.1};
         double random_range = 0.001;
         int frequency = 2500;
 
-        if (args.length >= 12) {
+        if (args.length >= 13) {
             dataset_id = Integer.parseInt(args[0]);
             learning_rate = Double.parseDouble(args[1]);
             learning_rate_input_multiplier = Double.parseDouble(args[2]);
@@ -40,11 +41,12 @@ public class BTRunner {
             learning_rate_decay = Double.parseDouble(args[5]);
             use_linear_rho = Boolean.parseBoolean(args[6]);
             use_multi_modal = Boolean.parseBoolean(args[7]);
-            use_rms_prop = Boolean.parseBoolean(args[8]);
-            rms_prop_factors = new double[]{Double.parseDouble(args[9]), Double.parseDouble(args[10])};
-            random_range = Double.parseDouble(args[11]);
-            if(args.length > 12){
-                frequency = Integer.parseInt(args[12]);
+            user_weighted_alpha = Boolean.parseBoolean(args[8]);
+            use_rms_prop = Boolean.parseBoolean(args[9]);
+            rms_prop_factors = new double[]{Double.parseDouble(args[10]), Double.parseDouble(args[11])};
+            random_range = Double.parseDouble(args[12]);
+            if(args.length > 13){
+                frequency = Integer.parseInt(args[13]);
             }
         }
 
@@ -116,12 +118,20 @@ public class BTRunner {
             s += "Linear rho\n";
         if (use_multi_modal)
             s += "Multi modal\n";
+        if (user_weighted_alpha)
+            s += "Weighted alpha\n";
         if (use_rms_prop)
             s += "RMS PROP " + rms_prop_factors[0] + " " + rms_prop_factors[1] + "\n";
         s += "Special note: " + "\n";
 
         if (use_multi_modal && dataSet.first_modal_size == -1) {
             s += "Cannot use multi modal algorithm on non-multi-modal data set\n";
+            System.out.print(s);
+            return;
+        }
+
+        if(user_weighted_alpha && !use_multi_modal){
+            s += "Cannot use weighted alpha on non-multi modal run\n";
             System.out.print(s);
             return;
         }
@@ -133,6 +143,11 @@ public class BTRunner {
         } else {
             fileName += "no_rms_prop\\";
         }
+
+        if(user_weighted_alpha){
+            fileName += "weighted_average_and_";
+        }
+
         if (use_linear_rho && !use_multi_modal) {
             fileName += "linear_rho\\";
         } else if (!use_linear_rho && use_multi_modal) {
@@ -156,7 +171,7 @@ public class BTRunner {
             output = new BufferedWriter(new FileWriter(file));
             output.write(s);
             output.flush();
-            BT btm = new BT(dataSet, use_linear_rho, use_multi_modal, random_range, use_rms_prop, rms_prop_factors, output);
+            BT btm = new BT(dataSet, use_linear_rho, use_multi_modal, user_weighted_alpha, random_range, use_rms_prop, rms_prop_factors, output);
             btm.learnTree(learning_rate, learning_rate_input_multiplier, epoch, lambda, learning_rate_decay);
         } catch (IOException e) {
             e.printStackTrace();

@@ -59,18 +59,21 @@ class Node {
     /**
      * Weight of modalities for classes
      */
-    private double[] P1;
-    private double[] P2;
+    private double[][] P1;
 
-    private double[] gradient_P1;
-    private double[] gradient_P2;
+    private double[][] gradient_P1;
 
-    private double[] sum_grad_P1;
-    private double[] sum_grad_P2;
+    private double[][] sum_grad_P1;
+
+    private double[] P1_0;
+
+    private double[] gradient_P1_0;
+
+    private double[] sum_grad_P1_0;
 
     private double g1;
     private double g2;
-
+    private double[] sigmoid_p1;
 
     private double[] g;
     private double[] y;
@@ -102,20 +105,30 @@ class Node {
         gradient_w00 = 0;
         gradient_w01 = 0;
 
-        P1 = new double[tree.CLASS_COUNT];
-        P2 = new double[tree.CLASS_COUNT];
-        gradient_P1 = new double[tree.CLASS_COUNT];
-        gradient_P2 = new double[tree.CLASS_COUNT];
-        sum_grad_P1 = new double[tree.CLASS_COUNT];
-        sum_grad_P2 = new double[tree.CLASS_COUNT];
+        if(tree.user_weighted_alpha){
+            P1 = new double[tree.CLASS_COUNT][tree.ATTRIBUTE_COUNT];
+            gradient_P1 = new double[tree.CLASS_COUNT][tree.ATTRIBUTE_COUNT];
+            sum_grad_P1 = new double[tree.CLASS_COUNT][tree.ATTRIBUTE_COUNT];
+            sigmoid_p1 = new double[tree.CLASS_COUNT];
+
+            for (int i = 0; i < tree.CLASS_COUNT; i++) {
+                for(int j = 0; j < tree.ATTRIBUTE_COUNT; j++) {
+                    P1[i][j] = 0.5;
+                    gradient_P1[i][j] = 0;
+                    sum_grad_P1[i][j] = 0;
+                }
+            }
+
+            Arrays.fill(sigmoid_p1, 0);
+        }
+        P1_0 = new double[tree.CLASS_COUNT];
+        gradient_P1_0 = new double[tree.CLASS_COUNT];
+        sum_grad_P1_0 = new double[tree.CLASS_COUNT];
 
 
-        Arrays.fill(P1, 0.5);
-        Arrays.fill(P2, 0.5);
-        Arrays.fill(gradient_P1, 0);
-        Arrays.fill(gradient_P2, 0);
-        Arrays.fill(sum_grad_P1, 0);
-        Arrays.fill(sum_grad_P2, 0);
+        Arrays.fill(P1_0, 0.5);
+        Arrays.fill(gradient_P1_0, 0);
+        Arrays.fill(sum_grad_P1_0, 0);
 
 
         if (tree.use_linear_rho) {
@@ -168,7 +181,12 @@ class Node {
             g1 = sigmoid(sum1);
             g2 = sigmoid(sum2);
             for (int i = 0; i < g.length; i++) {
-                g[i] = (P1[i] * g1 + P2[i] * g2) / (P1[i] + P2[i]);
+                if(tree.user_weighted_alpha){
+                    sigmoid_p1[i] = sigmoid(dotProduct(P1[i], instance.x) + P1_0[i]);
+                    g[i] =  sigmoid_p1[i] * g1 + (1 - sigmoid_p1[i]) * g2;
+                }else{
+                    g[i] = P1_0[i] * g1 + (1 - P1_0[i]) * g2;
+                }
             }
         } else {
             double gg = sigmoid(dotProduct(w, instance.x) + w0);
@@ -272,11 +290,18 @@ class Node {
             for (int j = 0; j < tree.CLASS_COUNT; j++) {
                 if (tree.user_multi_modal) {
                     int firstmodal_size = tree.dataSet.first_modal_size;
-                    //Project report equation 10
-                    if (i < firstmodal_size)
-                        gradient_w[i] += delta[j] * (1 - gamma) * g1 * (P1[j] / (P1[j] + P2[j])) * (1 - g1) * (left_y[j] - right_y[j]) * instance.x[i];
-                    else
-                        gradient_w[i] += delta[j] * (1 - gamma) * g2 * (P2[j] / (P1[j] + P2[j])) * (1 - g2) * (left_y[j] - right_y[j]) * instance.x[i];
+                    if(tree.user_weighted_alpha){
+                        if (i < firstmodal_size)
+                            gradient_w[i] += delta[j] * (1 - gamma) * g1 * sigmoid_p1[j] * (1 - g1) * (left_y[j] - right_y[j]) * instance.x[i];
+                        else
+                            gradient_w[i] += delta[j] * (1 - gamma) * g2 * (1 - sigmoid_p1[j]) * (1 - g2) * (left_y[j] - right_y[j]) * instance.x[i];
+                    }else{
+                        //Project report equation 10
+                        if (i < firstmodal_size)
+                            gradient_w[i] += delta[j] * (1 - gamma) * g1 * P1_0[j] * (1 - g1) * (left_y[j] - right_y[j]) * instance.x[i];
+                        else
+                            gradient_w[i] += delta[j] * (1 - gamma) * g2 * (1 - P1_0[j]) * (1 - g2) * (left_y[j] - right_y[j]) * instance.x[i];
+                    }
                 } else {
                     //Budding Trees paper derivative of J respect to w
                     gradient_w[i] += delta[j] * (1 - gamma) * g[j] * (1 - g[j]) * (left_y[j] - right_y[j]) * instance.x[i];
@@ -284,15 +309,23 @@ class Node {
             }
         }
 
+        if (tree.user_weighted_alpha) {
+            for (int i = 0; i < tree.CLASS_COUNT; i++) {
+                for (int j = 0; j < tree.ATTRIBUTE_COUNT; j++) {
+                    gradient_P1[i][j] = delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * ((g1 - g2) * (sigmoid_p1[i] * (1 - sigmoid_p1[i]) * instance.x[j]));
+                }
+            }
+        }
+
 
         //Project report equation 11
-        Arrays.fill(gradient_P1, 0);
+        Arrays.fill(gradient_P1_0, 0);
         for (int i = 0; i < tree.CLASS_COUNT; i++)
-            gradient_P1[i] += delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * ((g1 * (P1[i] + P2[i]) - (P1[i] * g1 + P2[i] * g2)) / ((P1[i] + P2[i]) * (P1[i] + P2[i])));
-
-        Arrays.fill(gradient_P2, 0);
-        for (int i = 0; i < tree.CLASS_COUNT; i++)
-            gradient_P2[i] += delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * ((g2 * (P1[i] + P2[i]) - (P1[i] * g1 + P2[i] * g2)) / ((P1[i] + P2[i]) * (P1[i] + P2[i])));
+            if(tree.user_weighted_alpha){
+                gradient_P1_0[i] = delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * (g1 - g2) * sigmoid_p1[i] * (1 - sigmoid_p1[i]);
+            }else{
+                gradient_P1_0[i] = delta[i] * (1 - gamma) * (left_y[i] - right_y[i]) * (g1 - g2);
+            }
 
         //Budding Trees paper derivative of J respect to w
         gradient_w0 = 0;
@@ -302,12 +335,20 @@ class Node {
         //Project report equation 11
         gradient_w00 = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
-            gradient_w00 += delta[i] * (1 - gamma) * g1 * (P1[i] / (P1[i] + P2[i])) * (1 - g1) * (left_y[i] - right_y[i]);
+            if(tree.user_weighted_alpha){
+                gradient_w00 += delta[i] * (1 - gamma) * g1 * sigmoid_p1[i] * (1 - g1) * (left_y[i] - right_y[i]);
+            }else{
+                gradient_w00 += delta[i] * (1 - gamma) * g1 * P1_0[i] * (1 - g1) * (left_y[i] - right_y[i]);
+            }
 
         //Project report equation 11
         gradient_w01 = 0;
         for (int i = 0; i < tree.CLASS_COUNT; i++)
-            gradient_w01 += delta[i] * (1 - gamma) * g2 * (P2[i] / (P1[i] + P2[i])) * (1 - g2) * (left_y[i] - right_y[i]);
+            if(tree.user_weighted_alpha){
+                gradient_w01 += delta[i] * (1 - gamma) * g2 * (1 - sigmoid_p1[i]) * (1 - g2) * (left_y[i] - right_y[i]);
+            }else{
+                gradient_w01 += delta[i] * (1 - gamma) * g2 * (1 - P1_0[i]) * (1 - g2) * (left_y[i] - right_y[i]);
+            }
 
 
         //Project report equation 13
@@ -354,17 +395,21 @@ class Node {
         }
 
         if (tree.user_multi_modal) {
-            for (int i = 0; i < sum_grad_P1.length; i++) {
-                sum_grad_P1[i] = tree.rms_prop_factors[0] * sum_grad_P1[i] + tree.rms_prop_factors[1] * gradient_P1[i] * gradient_P1[i];
-            }
-
-            for (int i = 0; i < sum_grad_P2.length; i++) {
-                sum_grad_P2[i] = tree.rms_prop_factors[0] * sum_grad_P2[i] + tree.rms_prop_factors[1] * gradient_P2[i] * gradient_P2[i];
+            for (int i = 0; i < sum_grad_P1_0.length; i++) {
+                sum_grad_P1_0[i] = tree.rms_prop_factors[0] * sum_grad_P1_0[i] + tree.rms_prop_factors[1] * gradient_P1_0[i] * gradient_P1_0[i];
             }
 
             sum_grad_w00 = tree.rms_prop_factors[0] *  sum_grad_w00 + tree.rms_prop_factors[1] * gradient_w00 * gradient_w00;
 
             sum_grad_w01 = tree.rms_prop_factors[0] * sum_grad_w01 + tree.rms_prop_factors[1] * gradient_w01 * gradient_w01;
+
+            if(tree.user_weighted_alpha){
+                for (int i = 0; i < tree.CLASS_COUNT; i++) {
+                    for (int j = 0; j < tree.ATTRIBUTE_COUNT; j++) {
+                        sum_grad_P1[i][j] = tree.rms_prop_factors[0] * sum_grad_P1[i][j] + tree.rms_prop_factors[1] * gradient_P1[i][j] * gradient_P1[i][j];
+                    }
+                }
+            }
         }
 
         sum_grad_w0 = tree.rms_prop_factors[0] * sum_grad_w0 + tree.rms_prop_factors[1] * gradient_w0 * gradient_w0;
@@ -401,14 +446,19 @@ class Node {
             if (sum_grad_w01 != 0)
                 w01 = w01 - tree.LEARNING_RATE * gradient_w01 / Math.sqrt(sum_grad_w01);
 
-            for (int i = 0; i < sum_grad_P1.length; i++) {
-                if (sum_grad_P1[i] != 0)
-                    P1[i] = P1[i] - tree.LEARNING_RATE * gradient_P1[i] / Math.sqrt(sum_grad_P1[i]);
+            for (int i = 0; i < sum_grad_P1_0.length; i++) {
+                if (sum_grad_P1_0[i] != 0)
+                    P1_0[i] = P1_0[i] - tree.LEARNING_RATE * gradient_P1_0[i] / Math.sqrt(sum_grad_P1_0[i]);
             }
 
-            for (int i = 0; i < sum_grad_P2.length; i++) {
-                if (sum_grad_P2[i] != 0)
-                    P2[i] = P2[i] - tree.LEARNING_RATE * gradient_P2[i] / Math.sqrt(sum_grad_P2[i]);
+            if(tree.user_weighted_alpha){
+                for (int i = 0; i < tree.CLASS_COUNT; i++) {
+                    for (int j = 0; j < tree.ATTRIBUTE_COUNT; j++) {
+                        if (sum_grad_P1[i][j] != 0) {
+                            P1[i][j] = (P1[i][j] - tree.LEARNING_RATE * tree.LEARNING_RATE_INPUT_MULTIPLIER * gradient_P1[i][j] / Math.sqrt(sum_grad_P1[i][j]));
+                        }
+                    }
+                }
             }
         }
         if (sum_grad_gamma != 0)

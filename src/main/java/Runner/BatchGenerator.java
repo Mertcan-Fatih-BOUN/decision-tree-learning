@@ -23,6 +23,7 @@ public class BatchGenerator {
     static double learning_rate_decay = 0.99;
     static boolean use_linear_rho = false;
     static boolean use_multi_modal = false;
+    static boolean user_weighted_alpha = false;
     static boolean use_rms_prop = false;
     static double[] rms_prop_factors = new double[]{0.9, 0.1};
     static double random_range = 0.001;
@@ -34,13 +35,15 @@ public class BatchGenerator {
         generateBatchesForNormalLinearBT();
         generateBatchesForNormalMutliGatingBT();
         generateBatchesForLinearMutliGatingBT();
+        generateBatchesForNormalWeightedMutliGatingBT();
+        generateBatchesForLinearWeightedMutliGatingBT();
         generateBatchesForNormalDoubleBT();
         generateBatchesForLinearDoubleBT();
     }
 
     public static String generateStringForRun(){
-        String run = "start \"dt\" /b java -cp log Runner.BTRunner %d %.4f %.4f %d %.4f %.4f %s %s %s %.4f %.4f %.4f %d> nul";
-        return String.format(Locale.ENGLISH, run, dataset_id, learning_rate, learning_rate_input_multiplier, epoch, lambda, learning_rate_decay, use_linear_rho, use_multi_modal, use_rms_prop, rms_prop_factors[0], rms_prop_factors[1], random_range, frequency_);
+        String run = "start \"dt\" /b java -cp log Runner.BTRunner %d %.4f %.4f %d %.4f %.4f %s %s %s %s %.4f %.4f %.4f %d> nul";
+        return String.format(Locale.ENGLISH, run, dataset_id, learning_rate, learning_rate_input_multiplier, epoch, lambda, learning_rate_decay, use_linear_rho, use_multi_modal, user_weighted_alpha, use_rms_prop, rms_prop_factors[0], rms_prop_factors[1], random_range, frequency_);
     }
 
     public static String generateStringForRunDoubleBT(){
@@ -54,6 +57,7 @@ public class BatchGenerator {
         epoch = 15;
         use_linear_rho = false;
         use_multi_modal = false;
+        user_weighted_alpha = false;
         String filename_suffix = "bt_normal";
         generateWithCurrentSettings(filename_suffix);
     }
@@ -64,6 +68,7 @@ public class BatchGenerator {
         epoch = 15;
         use_linear_rho = true;
         use_multi_modal = false;
+        user_weighted_alpha = false;
         String filename_suffix = "bt_normal_linear";
         generateWithCurrentSettings(filename_suffix);
 
@@ -75,6 +80,7 @@ public class BatchGenerator {
         epoch = 15;
         use_linear_rho = false;
         use_multi_modal = true;
+        user_weighted_alpha = false;
         String filename_suffix = "bt_normal_multi_gating";
         generateWithCurrentSettings(filename_suffix);
     }
@@ -85,7 +91,30 @@ public class BatchGenerator {
         epoch = 15;
         use_linear_rho = true;
         use_multi_modal = true;
+        user_weighted_alpha = false;
         String filename_suffix = "bt_linear_multi_gating";
+        generateWithCurrentSettings(filename_suffix);
+    }
+
+    public static void generateBatchesForNormalWeightedMutliGatingBT() throws IOException {
+        dataset_id = 1;
+        learning_rate = 0.1;
+        epoch = 15;
+        use_linear_rho = false;
+        use_multi_modal = true;
+        user_weighted_alpha = true;
+        String filename_suffix = "bt_normal_weighted_multi_gating";
+        generateWithCurrentSettings(filename_suffix);
+    }
+
+    public static void generateBatchesForLinearWeightedMutliGatingBT() throws IOException {
+        dataset_id = 1;
+        learning_rate = 0.1;
+        epoch = 15;
+        use_linear_rho = true;
+        use_multi_modal = true;
+        user_weighted_alpha = true;
+        String filename_suffix = "bt_linear_weighted_multi_gating";
         generateWithCurrentSettings(filename_suffix);
     }
 
