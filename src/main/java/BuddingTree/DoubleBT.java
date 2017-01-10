@@ -7,6 +7,7 @@ import Analysis.MultiEvaluable;
 import DataSet.DataSet.DataSet;
 import DataSet.Instance.Instance;
 import Misc.Util;
+import Runner.BTRunner;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -141,11 +142,13 @@ public class DoubleBT implements MultiEvaluable {
             } else if (this.type == DataSet.TYPE.REGRESSION)
                 System.out.printf("TO-DO");
 
-            long currentTimestamp = System.currentTimeMillis();
-            if(currentTimestamp > timestamp + 1000*60*45){
-                break;
-            }else{
-                timestamp = currentTimestamp;
+            if(BTRunner.epochTimeLimit != -1){
+                long currentTimestamp = System.currentTimeMillis();
+                if(currentTimestamp > timestamp + 1000*60*BTRunner.epochTimeLimit){
+                    break;
+                }else{
+                    timestamp = currentTimestamp;
+                }
             }
 
             Collections.shuffle(dataSet1.TRAINING_INSTANCES, Util.generator);

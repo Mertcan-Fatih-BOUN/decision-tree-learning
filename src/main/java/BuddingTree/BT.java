@@ -7,6 +7,7 @@ import Analysis.MAPError;
 import DataSet.DataSet.DataSet;
 import DataSet.Instance.Instance;
 import Misc.Util;
+import Runner.BTRunner;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -152,12 +153,15 @@ public class BT implements Evaluable {
                 }
             }
 
-            long currentTimestamp = System.currentTimeMillis();
-            if(currentTimestamp > timestamp + 1000*60*45){
-                break;
-            }else{
-                timestamp = currentTimestamp;
+            if(BTRunner.epochTimeLimit != -1){
+                long currentTimestamp = System.currentTimeMillis();
+                if(currentTimestamp > timestamp + 1000*60*BTRunner.epochTimeLimit){
+                    break;
+                }else{
+                    timestamp = currentTimestamp;
+                }
             }
+
 
             Collections.shuffle(X, Util.generator);
             for (Instance instance : X) {

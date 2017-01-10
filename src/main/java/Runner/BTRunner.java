@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class BTRunner {
+    public static int epochTimeLimit = -1;//-1 if disabled, time in minutes if enabled
     @SuppressWarnings("ConstantConditions")
     public static void main(String[] args) throws IOException, URISyntaxException {
         DataSet dataSet = null;
